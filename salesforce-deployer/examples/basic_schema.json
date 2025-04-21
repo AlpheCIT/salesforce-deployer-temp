@@ -1,0 +1,75 @@
+{
+  "objects": {
+    "Account__c": {
+      "label": "Account",
+      "fields": [
+        {
+          "name": "Name",
+          "type": "Text",
+          "length": 255
+        },
+        {
+          "name": "Industry__c",
+          "type": "Picklist",
+          "values": ["Technology", "Finance", "Healthcare"]
+        },
+        {
+          "name": "AnnualRevenue__c",
+          "type": "Currency"
+        }
+      ]
+    },
+    "Contact__c": {
+      "label": "Contact",
+      "fields": [
+        {
+          "name": "FirstName",
+          "type": "Text",
+          "length": 50
+        },
+        {
+          "name": "LastName",
+          "type": "Text",
+          "length": 50
+        },
+        {
+          "name": "Email",
+          "type": "Email"
+        },
+        {
+          "name": "Account__c",
+          "type": "Lookup",
+          "referenceTo": "Account__c"
+        }
+      ]
+    }
+  },
+  "workflowRules": {
+    "Account_Industry_Workflow": {
+      "description": "Workflow for Account Industry",
+      "criteria": "ISCHANGED(Industry__c)",
+      "actions": [
+        {
+          "type": "Email Alert",
+          "field": "Owner.Email"
+        }
+      ]
+    }
+  },
+  "dashboards": {
+    "Sales_Dashboard": {
+      "widgets": [
+        {
+          "type": "Chart",
+          "title": "Sales by Industry",
+          "source": "Sales_Reports"
+        }
+      ]
+    }
+  },
+  "lightningFlows": {
+    "Account_Creation_Flow": {
+      "description": "Flow for creating new accounts"
+    }
+  }
+}

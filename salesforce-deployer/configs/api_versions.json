@@ -1,0 +1,62 @@
+{
+  "default": "63.0",
+  "supported": [
+    {
+      "version": "63.0",
+      "releaseDate": "2024-02-10",
+      "endOfSupportDate": "2025-02-10",
+      "features": [
+        "All Salesforce metadata types supported",
+        "Enhanced flow capabilities",
+        "Service Cloud Voice features"
+      ]
+    },
+    {
+      "version": "62.0",
+      "releaseDate": "2023-10-14",
+      "endOfSupportDate": "2024-10-14",
+      "features": [
+        "Dynamic Forms for custom objects",
+        "Flow enhancements",
+        "Einstein GPT capabilities"
+      ]
+    },
+    {
+      "version": "61.0",
+      "releaseDate": "2023-06-12",
+      "endOfSupportDate": "2024-06-12",
+      "features": [
+        "Enhanced Omnichannel routing",
+        "New metadata types for Experience Cloud"
+      ]
+    },
+    {
+      "version": "60.0",
+      "releaseDate": "2023-02-13", 
+      "endOfSupportDate": "2024-02-13",
+      "features": [
+        "Flow orchestration enhancements",
+        "Dynamic interactions"
+      ]
+    }
+  ],
+  "metadataTypeAvailability": {
+    "Flow": "18.0+",
+    "LightningComponentBundle": "45.0+",
+    "ExperienceBundle": "46.0+",
+    "AIApplication": "54.0+",
+    "OmniSupervisorConfig": "38.0+"
+  },
+  "deprecationWarnings": [
+    {
+      "version": "50.0",
+      "metadata": "LiveChatDeployment",
+      "message": "LiveChatDeployment has been deprecated in API version 50.0. Use MessagingChannel instead."
+    },
+    {
+      "version": "52.0",
+      "metadata": "SiteSettings",
+      "message": "SiteSettings API behavior changes substantially in API version 53.0 and later."
+    }
+  ]
+}

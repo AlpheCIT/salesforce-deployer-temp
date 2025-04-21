@@ -1,0 +1,96 @@
+{
+  "objects": {
+    "Account__c": {
+      "label": "Account",
+      "fields": [
+        {
+          "name": "Name",
+          "type": "Text",
+          "length": 255
+        },
+        {
+          "name": "Industry__c",
+          "type": "Picklist",
+          "values": ["Technology", "Finance", "Healthcare"]
+        },
+        {
+          "name": "Annual_Revenue__c",
+          "type": "Currency"
+        }
+      ]
+    },
+    "Contact__c": {
+      "label": "Contact",
+      "fields": [
+        {
+          "name": "FirstName",
+          "type": "Text",
+          "length": 50
+        },
+        {
+          "name": "LastName",
+          "type": "Text",
+          "length": 50
+        },
+        {
+          "name": "Email",
+          "type": "Email"
+        },
+        {
+          "name": "Account__c",
+          "type": "Lookup",
+          "referenceTo": "Account__c"
+        }
+      ]
+    }
+  },
+  "workflowRules": {
+    "Account_Industry_Workflow": {
+      "description": "Workflow for Account Industry changes",
+      "criteria": "ISCHANGED(Industry__c)",
+      "actions": [
+        {
+          "type": "Email Alert",
+          "emailTemplate": "Industry Change Notification",
+          "recipients": ["admin@example.com"]
+        }
+      ]
+    }
+  },
+  "dashboards": {
+    "Sales_Dashboard": {
+      "title": "Sales Overview",
+      "widgets": [
+        {
+          "type": "Chart",
+          "title": "Annual Revenue by Industry",
+          "source": "Account__c"
+        },
+        {
+          "type": "Table",
+          "title": "Top Contacts",
+          "source": "Contact__c"
+        }
+      ]
+    }
+  },
+  "lightningFlows": {
+    "Account_Creation_Flow": {
+      "description": "Flow for creating new accounts",
+      "steps": [
+        {
+          "type": "Input",
+          "label": "Account Name"
+        },
+        {
+          "type": "Decision",
+          "label": "Is Industry Selected?"
+        },
+        {
+          "type": "Create Record",
+          "object": "Account__c"
+        }
+      ]
+    }
+  }
+}

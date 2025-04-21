@@ -1,0 +1,80 @@
+{
+    "objects": {
+      "Case": {
+        "label": "VMDR Support Case",
+        "fields": [
+          {"name": "Product_Affected__c", "type": "Picklist", "values": ["VMDR", "WAS", "Container Security", "Patch Management", "PCI Compliance"]},
+          {"name": "Severity__c", "type": "Picklist", "values": ["P1 - Critical", "P2 - High", "P3 - Medium", "P4 - Low"]},
+          {"name": "Root_Cause__c", "type": "Picklist", "values": ["Configuration Issue", "Software Bug", "User Error", "Integration Issue"]},
+          {"name": "False_Positive_Dispute__c", "type": "Checkbox"},
+          {"name": "Vulnerability_ID__c", "type": "Text"},
+          {"name": "Patch_Deployment_Status__c", "type": "Picklist", "values": ["Pending", "In Progress", "Completed"]},
+          {"name": "Scan_Type__c", "type": "Picklist", "values": ["Network", "Web App", "Container", "API"]},
+          {"name": "Scanner_Type__c", "type": "Picklist", "values": ["Cloud Agent", "Network Scanner", "External Scanner"]},
+          {"name": "Agent_Version__c", "type": "Text"},
+          {"name": "Last_Heartbeat_Timestamp__c", "type": "DateTime"},
+          {"name": "Network_Segment__c", "type": "Picklist", "values": ["DMZ", "Internal", "Cloud", "VPN"]},
+          {"name": "Operating_System_Build__c", "type": "Text"},
+          {"name": "Scan_Duration__c", "type": "Number"},
+          {"name": "Scan_Status__c", "type": "Picklist", "values": ["Completed", "Partial", "Timed Out", "Failed"]},
+          {"name": "Error_Code__c", "type": "Text"},
+          {"name": "Remediation_Step_Taken__c", "type": "Multi-Picklist", "values": ["Reboot", "Patch Applied", "Manual Fix", "Workaround Used"]},
+          {"name": "Internal_Case_ID__c", "type": "Lookup", "referenceTo": "Case"},
+          {"name": "Jira_Bug_ID__c", "type": "Text"},
+          {"name": "Backend_API_Response__c", "type": "Long Text Area"},
+          {"name": "Affected_Cloud_Service__c", "type": "Picklist", "values": ["AWS", "Azure", "GCP", "On-Prem"]},
+          {"name": "Agent_Log_File__c", "type": "Text"},
+          {"name": "Number_of_Affected_Assets__c", "type": "Number"},
+          {"name": "Time_to_First_Response__c", "type": "Number"},
+          {"name": "Time_to_Resolution__c", "type": "Number"},
+          {"name": "Customer_Impact_Level__c", "type": "Picklist", "values": ["Low", "Medium", "High", "Critical"]},
+          {"name": "Escalation_Reason__c", "type": "Picklist", "values": ["SLA Breach", "High Customer Impact", "Bug in Qualys Software", "False Positive Dispute"]},
+          {"name": "Duplicate_Case_ID__c", "type": "Lookup", "referenceTo": "Case"}
+        ]
+      },
+      "Account": {
+        "label": "Customer Account",
+        "fields": [
+          {"name": "Active_Products__c", "type": "Multi-Picklist", "values": ["VMDR", "WAS", "Container Security", "Patch Management", "PCI Compliance"]},
+          {"name": "SLA_Level__c", "type": "Picklist", "values": ["Standard (24h)", "Premium (12h)", "Enterprise (4h)"]},
+          {"name": "Account_Manager__c", "type": "Lookup", "referenceTo": "User"},
+          {"name": "Renewal_Date__c", "type": "Date"}
+        ]
+      },
+      "Contact": {
+        "label": "Customer IT Contact",
+        "fields": [
+          {"name": "Security_Team_Role__c", "type": "Picklist", "values": ["CISO", "IT Security Engineer", "DevSecOps", "Compliance Manager"]},
+          {"name": "Product_Specialization__c", "type": "Multi-Picklist", "values": ["VMDR", "WAS", "Container Security", "Patch Management", "PCI Compliance"]}
+        ]
+      }
+    },
+    "workflowRules": {
+      "SLA_Escalation": {
+        "description": "Escalate unresolved high-priority cases",
+        "criteria": "AND(Severity__c = 'P1 - Critical', Time_to_Resolution__c > 240)",
+        "actions": [
+          {"type": "FieldUpdate", "field": "Escalation_Reason__c", "value": "SLA Breach"},
+          {"type": "Notify", "recipient": "Tier2_Support_Team"}
+        ]
+      },
+      "Duplicate_Detection": {
+        "description": "Prevent duplicate vulnerability cases",
+        "criteria": "AND(Vulnerability_ID__c != '', ISBLANK(Duplicate_Case_ID__c))",
+        "actions": [
+          {"type": "FieldUpdate", "field": "Duplicate_Case_ID__c", "value": "Find duplicate case"},
+          {"type": "Notify", "recipient": "Support_Agent"}
+        ]
+      }
+    },
+    "dashboards": {
+      "Executive_Vulnerability_Overview": {
+        "widgets": [
+          {"type": "Metric", "title": "Total Open Cases", "source": "COUNT(Case)"},
+          {"type": "Chart", "title": "False Positive Rate by Product", "source": "COUNT(False_Positive_Dispute__c)"},
+          {"type": "Chart", "title": "SLA Compliance %", "source": "AVG(Time_to_Resolution__c < SLA_Level__c)"},
+          {"type": "Table", "title": "Top 10 Vulnerabilities Reported", "source": "GROUP BY Vulnerability_ID__c"}
+        ]
+      }
+    }
+  }

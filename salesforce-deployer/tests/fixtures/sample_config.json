@@ -1,0 +1,79 @@
+{
+  "objects": {
+    "Account__c": {
+      "label": "Account",
+      "fields": [
+        {
+          "name": "Name",
+          "type": "Text",
+          "length": 255
+        },
+        {
+          "name": "Industry__c",
+          "type": "Picklist",
+          "values": ["Technology", "Finance", "Healthcare"]
+        },
+        {
+          "name": "Annual_Revenue__c",
+          "type": "Currency"
+        }
+      ]
+    },
+    "Contact__c": {
+      "label": "Contact",
+      "fields": [
+        {
+          "name": "FirstName",
+          "type": "Text",
+          "length": 50
+        },
+        {
+          "name": "LastName",
+          "type": "Text",
+          "length": 50
+        },
+        {
+          "name": "Email",
+          "type": "Email"
+        }
+      ]
+    }
+  },
+  "workflowRules": {
+    "Account_Industry_Workflow": {
+      "description": "Workflow for Account Industry changes",
+      "criteria": "ISCHANGED(Industry__c)",
+      "actions": [
+        {
+          "type": "Email Alert",
+          "emailTemplate": "Industry Change Notification"
+        }
+      ]
+    }
+  },
+  "dashboards": {
+    "Sales_Dashboard": {
+      "title": "Sales Overview",
+      "widgets": [
+        {
+          "type": "Chart",
+          "title": "Sales by Industry",
+          "source": "SalesData"
+        }
+      ]
+    }
+  },
+  "lightningFlows": {
+    "Account_Creation_Flow": {
+      "description": "Flow for creating new accounts"
+    }
+  },
+  "serviceConsole": {
+    "components": {
+      "ConsoleApp": {
+        "label": "Sales Console",
+        "flexipage": "SalesConsolePage"
+      }
+    }
+  }
+}

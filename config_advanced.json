@@ -1,0 +1,740 @@
+{
+  "objects": {
+    "Case": {
+      "label": "Security Support Case",
+      "fields": [
+        {"name": "Product_Affected__c", "type": "Picklist", "values": ["VMDR", "WAS", "Container Security", "Policy Compliance", "FIM", "IOC", "Patch Management", "Asset Management", "Threat Protection"]},
+        {"name": "Severity__c", "type": "Picklist", "values": ["P1 - Critical", "P2 - High", "P3 - Medium", "P4 - Low"]},
+        {"name": "Root_Cause__c", "type": "Picklist", "values": ["Configuration Issue", "Software Bug", "User Error", "Integration Issue", "Environment-Specific Problem", "Documentation Gap"]},
+        {"name": "False_Positive_Dispute__c", "type": "Checkbox"},
+        {"name": "Vulnerability_ID__c", "type": "Text"},
+        {"name": "QID__c", "type": "Text"},
+        {"name": "Patch_Deployment_Status__c", "type": "Picklist", "values": ["Pending", "In Progress", "Completed"]},
+        {"name": "Scan_Type__c", "type": "Picklist", "values": ["Network", "Web App", "Container", "Policy", "File Integrity", "Indicator of Compromise"]},
+        {"name": "Scanner_Type__c", "type": "Picklist", "values": ["Cloud Agent", "Qualys Scanner Appliance", "External Scanner", "Container Sensor", "Cloud Connector"]},
+        {"name": "Agent_Version__c", "type": "Text"},
+        {"name": "Last_Heartbeat_Timestamp__c", "type": "DateTime"},
+        {"name": "Network_Segment__c", "type": "Picklist", "values": ["DMZ", "Internal", "Cloud", "VPN"]},
+        {"name": "Operating_System_Build__c", "type": "Text"},
+        {"name": "Scan_Duration__c", "type": "Number"},
+        {"name": "Scan_Status__c", "type": "Picklist", "values": ["Completed", "Partial", "Timed Out", "Failed"]},
+        {"name": "Error_Code__c", "type": "Text"},
+        {"name": "Remediation_Step_Taken__c", "type": "Multi-Picklist", "values": ["Reboot", "Patch Applied", "Manual Fix", "Workaround Used", "Configuration Change"]},
+        {"name": "Internal_Case_ID__c", "type": "Lookup", "referenceTo": "Case"},
+        {"name": "Jira_Bug_ID__c", "type": "Text"},
+        {"name": "Backend_API_Response__c", "type": "Long Text Area"},
+        {"name": "Affected_Cloud_Service__c", "type": "Picklist", "values": ["AWS", "Azure", "GCP", "Oracle Cloud", "On-Prem"]},
+        {"name": "Agent_Log_File__c", "type": "Text"},
+        {"name": "Number_of_Affected_Assets__c", "type": "Number"},
+        {"name": "Time_to_First_Response__c", "type": "Number"},
+        {"name": "Time_to_Resolution__c", "type": "Number"},
+        {"name": "Customer_Impact_Level__c", "type": "Picklist", "values": ["Low", "Medium", "High", "Critical"]},
+        {"name": "Escalation_Reason__c", "type": "Picklist", "values": ["SLA Breach", "High Customer Impact", "Bug in Qualys Software", "False Positive Dispute", "Executive Visibility"]},
+        {"name": "Duplicate_Case_ID__c", "type": "Lookup", "referenceTo": "Case"},
+        {"name": "Security_Value_Category__c", "type": "Picklist", "values": ["Vulnerability Mitigation", "Compliance Achievement", "Time Savings", "Risk Reduction", "Breach Prevention"]},
+        {"name": "Security_Value_Amount__c", "type": "Currency"},
+        {"name": "Value_Calculation_Method__c", "type": "Picklist", "values": ["Standard Qualys Formula", "Customer MTTD Improvement", "Customer MTTR Improvement", "Risk Exposure Reduction", "Manual Estimation"]},
+        {"name": "CSAT_Score__c", "type": "Number"},
+        {"name": "Expansion_Opportunity__c", "type": "Lookup", "referenceTo": "Opportunity"},
+        {"name": "Knowledge_Articles_Used__c", "type": "Multi-Picklist", "referenceTo": "Knowledge_Article"},
+        {"name": "Case_Outcome__c", "type": "Picklist", "values": ["Issue Resolved", "Workaround Provided", "Feature Request", "Bug Reported", "Training Provided"]},
+        {"name": "Training_Need_Identified__c", "type": "Checkbox"},
+        {"name": "Product_Feedback_Captured__c", "type": "Long Text Area"},
+        {"name": "CVSS_Score__c", "type": "Number"},
+        {"name": "Compliance_Frameworks_Affected__c", "type": "Multi-Picklist", "values": ["PCI DSS", "HIPAA", "SOX", "GDPR", "CCPA", "ISO 27001", "NIST CSF", "CIS Benchmarks"]}
+      ]
+    },
+    "Account": {
+      "label": "Qualys Customer Account",
+      "fields": [
+        {"name": "Active_Products__c", "type": "Multi-Picklist", "values": ["VMDR", "WAS", "Container Security", "Policy Compliance", "FIM", "IOC", "Patch Management", "Asset Management", "Threat Protection"]},
+        {"name": "SLA_Level__c", "type": "Picklist", "values": ["Standard (24h)", "Premium (12h)", "Enterprise (4h)", "Platinum (2h)"]},
+        {"name": "Account_Manager__c", "type": "Lookup", "referenceTo": "User"},
+        {"name": "SLA_Level__c", "type": "Picklist", "values": ["Standard (24h)", "Premium (12h)", "Enterprise (4h)", "Platinum (2h)"]},
+        {"name": "Account_Manager__c", "type": "Lookup", "referenceTo": "User"},
+        {"name": "Renewal_Date__c", "type": "Date"},
+        {"name": "Annual_Security_Spend__c", "type": "Currency"},
+        {"name": "Contract_End_Date__c", "type": "Date"},
+        {"name": "Days_To_Renewal__c", "type": "Formula", "formula": "Contract_End_Date__c - TODAY()"},
+        {"name": "Lifetime_Value__c", "type": "Currency"},
+        {"name": "Compliance_Requirements__c", "type": "Multi-Picklist", "values": ["PCI DSS", "HIPAA", "SOX", "GDPR", "CCPA", "ISO 27001", "NIST CSF", "CIS Benchmarks", "FedRAMP"]},
+        {"name": "Customer_Health_Score__c", "type": "Number"},
+        {"name": "Product_Adoption_Score__c", "type": "Number"},
+        {"name": "Total_Assets_Monitored__c", "type": "Number"},
+        {"name": "Average_Resolution_Time__c", "type": "Formula", "formula": "Average(Case.Time_to_Resolution__c)"},
+        {"name": "Scanner_Usage_Trend__c", "type": "Picklist", "values": ["Increasing", "Stable", "Decreasing"]},
+        {"name": "Customer_Tier__c", "type": "Picklist", "values": ["Strategic", "Enterprise", "Mid-Market", "SMB"]},
+        {"name": "Security_Team_Size__c", "type": "Number"},
+        {"name": "Last_QBR_Date__c", "type": "Date"},
+        {"name": "Next_QBR_Date__c", "type": "Date"},
+        {"name": "Growth_Opportunity_Value__c", "type": "Currency"},
+        {"name": "Risk_Posture_Trend__c", "type": "Picklist", "values": ["Improving", "Stable", "Degrading"]},
+        {"name": "Cloud_Migration_Status__c", "type": "Picklist", "values": ["Planning", "In Progress", "Complete", "Hybrid", "N/A"]},
+        {"name": "Total_Assets_By_Category__c", "type": "Text Area", "description": "JSON field mapping asset types to counts"},
+        {"name": "Vulnerability_Trend_30days__c", "type": "Picklist", "values": ["Decreasing", "Stable", "Increasing"]},
+        {"name": "Average_Asset_Scan_Frequency__c", "type": "Number"},
+        {"name": "TruRisk_Score__c", "type": "Number", "description": "Qualys TruRisk score for the customer environment"}
+      ]
+    },
+    "Contact": {
+      "label": "Customer Security Contact",
+      "fields": [
+        {"name": "Security_Team_Role__c", "type": "Picklist", "values": ["CISO", "IT Security Engineer", "DevSecOps", "Compliance Manager", "Security Analyst", "Vulnerability Manager", "IT Operations"]},
+        {"name": "Product_Specialization__c", "type": "Multi-Picklist", "values": ["VMDR", "WAS", "Container Security", "Policy Compliance", "FIM", "IOC", "Patch Management", "Asset Management", "Threat Protection"]},
+        {"name": "Security_Team_Role__c", "type": "Picklist", "values": ["CISO", "IT Security Engineer", "DevSecOps", "Compliance Manager", "Security Analyst", "Vulnerability Manager", "IT Operations"]},
+        {"name": "Product_Specialization__c", "type": "Multi-Picklist", "values": ["VMDR", "WAS", "Container Security", "Policy Compliance", "FIM", "IOC", "Patch Management", "Asset Management", "Threat Protection"]},
+        {"name": "Decision_Authority__c", "type": "Picklist", "values": ["Decision Maker", "Influencer", "Technical Evaluator", "End User"]},
+        {"name": "Historical_Sentiment__c", "type": "Picklist", "values": ["Very Positive", "Positive", "Neutral", "Concerned", "At Risk"]},
+        {"name": "Buying_Committee_Member__c", "type": "Checkbox"},
+        {"name": "Case_History_Summary__c", "type": "Formula", "formula": "COUNT(Case) & ' cases, ' & AVG(Case.CSAT_Score__c) & ' avg. CSAT'"},
+        {"name": "Security_Priorities__c", "type": "Multi-Picklist", "values": ["Vulnerability Management", "Compliance", "Cloud Security", "DevSecOps", "Security Automation", "Breach Prevention"]},
+        {"name": "Qualys_Community_Member__c", "type": "Checkbox"},
+        {"name": "Last_Qualys_Conference_Attended__c", "type": "Text"},
+        {"name": "Product_Feature_Requests__c", "type": "Long Text Area"}
+      ]
+    },
+    "Opportunity": {
+      "label": "Qualys Sales Opportunity",
+      "fields": [
+        {"name": "Type", "type": "Picklist", "values": ["New Business", "Add-On", "Renewal", "Services"]},
+        {"name": "StageName", "type": "Picklist", "values": ["Qualification", "Security Assessment", "Technical Evaluation", "POC", "Proposal", "Negotiation", "Closed Won", "Closed Lost"]},
+        {"name": "Amount", "type": "Currency"},
+        {"name": "CloseDate", "type": "Date"},
+        {"name": "Products_Of_Interest__c", "type": "Multi-Picklist", "values": ["VMDR", "WAS", "Container Security", "Policy Compliance", "FIM", "IOC", "Patch Management", "Asset Management", "Threat Protection"]},
+        {"name": "Technical_Champion__c", "type": "Lookup", "referenceTo": "Contact"},
+        {"name": "Executive_Sponsor__c", "type": "Lookup", "referenceTo": "Contact"},
+        {"name": "Case_Originated__c", "type": "Checkbox"},
+        {"name": "Originating_Case_ID__c", "type": "Lookup", "referenceTo": "Case"},
+        {"name": "Security_Challenge_Addressed__c", "type": "Multi-Picklist", "values": ["Compliance Gaps", "Vulnerability Management", "Cloud Security", "Operational Efficiency", "Risk Reduction", "Breach Prevention"]},
+        {"name": "Technical_Validation_Status__c", "type": "Picklist", "values": ["Not Started", "In Progress", "Successful", "Failed"]},
+        {"name": "Expected_Annual_Recurring_Revenue__c", "type": "Currency"},
+        {"name": "Vulnerability_Scan_Results__c", "type": "Text Area", "description": "Summary of POC scan results"},
+        {"name": "Competitive_Displacement__c", "type": "Picklist", "values": ["None", "Rapid7", "Tenable", "InsightVM", "Nexpose", "Nessus"]},
+        {"name": "License_Type__c", "type": "Picklist", "values": ["Subscription", "Perpetual"]},
+        {"name": "Asset_Count__c", "type": "Number"},
+        {"name": "Web_App_Count__c", "type": "Number"},
+        {"name": "Cloud_Workload_Count__c", "type": "Number"},
+        {"name": "Container_Count__c", "type": "Number"},
+        {"name": "Expected_Time_To_Value__c", "type": "Picklist", "values": ["1-7 days", "8-30 days", "31-90 days", "90+ days"]}
+      ]
+    },
+    "Security_Value_Metric__c": {
+      "label": "Qualys Security Value Metric",
+      "fields": [
+        {"name": "Account__c", "type": "Lookup", "referenceTo": "Account"},
+        {"name": "Measurement_Date__c", "type": "Date"},
+        {"name": "Value_Type__c", "type": "Picklist", "values": ["Mean Time to Detect Reduction", "Mean Time to Remediate Reduction", "Risk Reduction", "Compliance Achievement", "Operational Efficiency"]},
+        {"name": "Quantified_Value__c", "type": "Currency"},
+        {"name": "Calculation_Method__c", "type": "Picklist", "values": ["Qualys Standard Formula", "Customer Reported", "Manual Estimation", "Industry Benchmark"]},
+        {"name": "Qualys_Product__c", "type": "Picklist", "values": ["VMDR", "WAS", "Container Security", "Policy Compliance", "FIM", "IOC", "Patch Management", "Asset Management", "Threat Protection"]},
+        {"name": "Source_Case__c", "type": "Lookup", "referenceTo": "Case"},
+        {"name": "Value_Description__c", "type": "Text Area"},
+        {"name": "Critical_Vulnerabilities_Addressed__c", "type": "Number"},
+        {"name": "High_Vulnerabilities_Addressed__c", "type": "Number"},
+        {"name": "Pre_Qualys_Detection_Time__c", "type": "Number"},
+        {"name": "Post_Qualys_Detection_Time__c", "type": "Number"},
+        {"name": "Pre_Qualys_Remediation_Time__c", "type": "Number"},
+        {"name": "Post_Qualys_Remediation_Time__c", "type": "Number"}
+      ]
+    },
+    "Security_Objective__c": {
+      "label": "Customer Security Objective",
+      "fields": [
+        {"name": "Account__c", "type": "Lookup", "referenceTo": "Account"},
+        {"name": "Objective_Category__c", "type": "Picklist", "values": ["Reduce MTTR", "Achieve Compliance", "Secure Cloud Migration", "Improve Vulnerability Management", "Automate Security"]},
+        {"name": "Status__c", "type": "Picklist", "values": ["Planned", "In Progress", "Achieved", "At Risk"]},
+        {"name": "Target_Date__c", "type": "Date"},
+        {"name": "Success_Criteria__c", "type": "Text Area"},
+        {"name": "Value_Upon_Completion__c", "type": "Currency"},
+        {"name": "Qualys_Products_Contributing__c", "type": "Multi-Picklist", "values": ["VMDR", "WAS", "Container Security", "Policy Compliance", "FIM", "IOC", "Patch Management", "Asset Management", "Threat Protection"]},
+        {"name": "Progress_Percentage__c", "type": "Percent"},
+        {"name": "Initial_Security_Posture__c", "type": "Text Area"},
+        {"name": "Current_Security_Posture__c", "type": "Text Area"},
+        {"name": "Target_Security_Posture__c", "type": "Text Area"}
+      ]
+    },
+    "Qualys_Solution_Recommendation__c": {
+      "label": "Qualys Solution Recommendation",
+      "fields": [
+        {"name": "Solution_Name__c", "type": "Text"},
+        {"name": "Security_Need_Addressed__c", "type": "Picklist", "values": ["Vulnerability Management", "Compliance", "Cloud Security", "Application Security", "Endpoint Security", "DevSecOps", "Security Operations"]},
+        {"name": "Products_Included__c", "type": "Multi-Picklist", "values": ["VMDR", "WAS", "Container Security", "Policy Compliance", "FIM", "IOC", "Patch Management", "Asset Management", "Threat Protection"]},
+        {"name": "Time_To_Value__c", "type": "Picklist", "values": ["1-7 days", "8-30 days", "31-90 days", "90+ days"]},
+        {"name": "Implementation_Complexity__c", "type": "Picklist", "values": ["Low", "Medium", "High"]},
+        {"name": "Target_Customer_Size__c", "type": "Picklist", "values": ["SMB", "Mid-Market", "Enterprise", "Global Enterprise"]},
+        {"name": "Industry_Focus__c", "type": "Multi-Picklist", "values": ["Healthcare", "Financial Services", "Retail", "Manufacturing", "Government", "Technology"]},
+        {"name": "Value_Proposition__c", "type": "Text Area"},
+        {"name": "Success_Metrics__c", "type": "Text Area"},
+        {"name": "Competitive_Differentiation__c", "type": "Text Area"},
+        {"name": "Reference_Architecture__c", "type": "Text"}
+      ]
+    },
+    "Vulnerability__c": {
+      "label": "Vulnerability",
+      "fields": [
+        {"name": "QID__c", "type": "Text"},
+        {"name": "CVE_ID__c", "type": "Text"},
+        {"name": "Title__c", "type": "Text"},
+        {"name": "CVSS_Score__c", "type": "Number"},
+        {"name": "Severity__c", "type": "Picklist", "values": ["Critical", "High", "Medium", "Low"]},
+        {"name": "Affected_Products__c", "type": "Text Area"},
+        {"name": "Detection_Method__c", "type": "Picklist", "values": ["Authenticated", "Unauthenticated", "Remote", "Local"]},
+        {"name": "Patch_Available__c", "type": "Checkbox"},
+        {"name": "Workaround_Available__c", "type": "Checkbox"},
+        {"name": "First_Found_Date__c", "type": "Date"},
+        {"name": "Last_Found_Date__c", "type": "Date"},
+        {"name": "False_Positive_Rate__c", "type": "Percent"}
+      ]
+    },
+    "Security_Training__c": {
+      "label": "Qualys Security Training",
+      "fields": [
+        {"name": "Training_Name__c", "type": "Text"},
+        {"name": "Training_Type__c", "type": "Picklist", "values": ["Product", "Security Best Practices", "Compliance", "Certification"]},
+        {"name": "Products_Covered__c", "type": "Multi-Picklist", "values": ["VMDR", "WAS", "Container Security", "Policy Compliance", "FIM", "IOC", "Patch Management", "Asset Management", "Threat Protection"]},
+        {"name": "Duration__c", "type": "Number"},
+        {"name": "Format__c", "type": "Picklist", "values": ["Online Self-Paced", "Instructor-Led Virtual", "On-Site", "Webinar"]},
+        {"name": "Certification_Offered__c", "type": "Checkbox"},
+        {"name": "Price__c", "type": "Currency"}
+      ]
+    }
+  },
+  "workflowRules": {
+    "SLA_Escalation": {
+      "description": "Escalate unresolved high-priority security cases",
+      "criteria": "AND(Severity__c = 'P1 - Critical', Time_to_Resolution__c > 240)",
+      "actions": [
+        {"type": "FieldUpdate", "field": "Escalation_Reason__c", "value": "SLA Breach"},
+        {"type": "Notify", "recipient": "Tier2_Support_Team"}
+      ]
+    },
+    "Duplicate_Detection": {
+      "description": "Prevent duplicate vulnerability cases",
+      "criteria": "AND(Vulnerability_ID__c != '', ISBLANK(Duplicate_Case_ID__c))",
+      "actions": [
+        {"type": "FieldUpdate", "field": "Duplicate_Case_ID__c", "value": "Find duplicate case"},
+        {"type": "Notify", "recipient": "Support_Agent"}
+      ]
+    },
+    "Renewal_Risk_Alert": {
+      "description": "Alert on accounts with negative sentiment approaching renewal",
+      "criteria": "AND(Days_To_Renewal__c < 90, Customer_Health_Score__c < 60)",
+      "actions": [
+        {"type": "Task", "assignedTo": "Account_Manager__c", "subject": "Renewal Risk - Intervention Required"},
+        {"type": "Notify", "recipient": "Qualys_Sales_Management"}
+      ]
+    },
+    "Security_Expansion_Opportunity": {
+      "description": "Create opportunity when support case reveals expansion potential",
+      "criteria": "OR(Case.Training_Need_Identified__c = true, Case.Product_Feedback_Captured__c CONTAINS 'need additional', Case.CSAT_Score__c > 8)",
+      "actions": [
+        {"type": "CreateRecord", "object": "Opportunity", "fields": {
+          "Type": "Add-On",
+          "StageName": "Qualification",
+          "Case_Originated__c": "true",
+          "Originating_Case_ID__c": "Case.Id"
+        }},
+        {"type": "Notify", "recipient": "Account_Manager__c"}
+      ]
+    },
+    "Security_Value_Metric_Creation": {
+      "description": "Create security value metric record when case is resolved",
+      "criteria": "AND(Case.Status = 'Closed', Case.Security_Value_Amount__c > 0)",
+      "actions": [
+        {"type": "CreateRecord", "object": "Security_Value_Metric__c", "fields": {
+          "Account__c": "Case.AccountId",
+          "Measurement_Date__c": "TODAY()",
+          "Value_Type__c": "Case.Security_Value_Category__c",
+          "Quantified_Value__c": "Case.Security_Value_Amount__c",
+          "Source_Case__c": "Case.Id",
+          "Qualys_Product__c": "Case.Product_Affected__c"
+        }}
+      ]
+    },
+    "Critical_Security_Context_Alert": {
+      "description": "Display strategic security customer context on case creation",
+      "criteria": "OR(Account.Customer_Tier__c = 'Strategic', Account.Customer_Tier__c = 'Enterprise', Case.Severity__c = 'P1 - Critical')",
+      "actions": [
+        {"type": "Alert", "message": "Strategic security customer: {!Account.Customer_Health_Score__c} health score, {!Account.Days_To_Renewal__c} days to renewal, {!Account.TruRisk_Score__c} TruRisk score, {!Account.Vulnerability_Trend_30days__c} vulnerability trend"},
+        {"type": "FieldUpdate", "field": "Case.Priority", "value": "High"}
+      ]
+    },
+    "Compliance_Critical_Issue": {
+      "description": "Flag cases that could impact customer compliance status",
+      "criteria": "Case.Compliance_Frameworks_Affected__c != NULL",
+      "actions": [
+        {"type": "FieldUpdate", "field": "Case.Priority", "value": "High"},
+        {"type": "Notify", "recipient": "Compliance_Specialist_Team"}
+      ]
+    }
+  },
+  "dashboards": {
+    "Executive_Vulnerability_Overview": {
+      "widgets": [
+        {"type": "Metric", "title": "Total Open Cases", "source": "COUNT(Case)"},
+        {"type": "Chart", "title": "False Positive Rate by Product", "source": "COUNT(False_Positive_Dispute__c)"},
+        {"type": "Chart", "title": "SLA Compliance %", "source": "AVG(Time_to_Resolution__c < SLA_Level__c)"},
+        {"type": "Table", "title": "Top 10 Vulnerabilities Reported", "source": "GROUP BY Vulnerability_ID__c"}
+      ]
+    },
+    "Security_Value_Dashboard": {
+      "widgets": [
+        {"type": "Metric", "title": "Total Security Value Generated", "source": "SUM(Security_Value_Metric__c.Quantified_Value__c)"},
+        {"type": "Chart", "title": "Value by Qualys Product", "source": "SUM(Security_Value_Metric__c.Quantified_Value__c) GROUP BY Qualys_Product__c"},
+        {"type": "Chart", "title": "Value by Account Tier", "source": "SUM(Security_Value_Metric__c.Quantified_Value__c) GROUP BY Account.Customer_Tier__c"},
+        {"type": "Chart", "title": "MTTR Improvement by Product", "source": "AVG(Security_Value_Metric__c.Pre_Qualys_Remediation_Time__c - Security_Value_Metric__c.Post_Qualys_Remediation_Time__c) GROUP BY Qualys_Product__c"},
+        {"type": "Table", "title": "Top Value-Generating Accounts", "source": "SUM(Security_Value_Metric__c.Quantified_Value__c) GROUP BY Account__c"}
+      ]
+    },
+    "Support_Agent_Security_Performance": {
+      "widgets": [
+        {"type": "Metric", "title": "Average CSAT Score", "source": "AVG(Case.CSAT_Score__c)"},
+        {"type": "Chart", "title": "Resolution Time by Agent", "source": "AVG(Case.Time_to_Resolution__c) GROUP BY Case.OwnerId"},
+        {"type": "Chart", "title": "Security Value Generated by Agent", "source": "SUM(Case.Security_Value_Amount__c) GROUP BY Case.OwnerId"},
+        {"type": "Chart", "title": "Security Expansion Opportunities Identified", "source": "COUNT(Opportunity.Case_Originated__c) GROUP BY Case.OwnerId"},
+        {"type": "Table", "title": "Critical Vulnerabilities Remediated by Agent", "source": "COUNT(Case.Severity__c='P1 - Critical' AND Case.Status='Closed') GROUP BY Case.OwnerId"}
+      ]
+    },
+    "TruRisk_Overview_Dashboard": {
+      "widgets": [
+        {"type": "Metric", "title": "Average Customer TruRisk Score", "source": "AVG(Account.TruRisk_Score__c)"},
+        {"type": "Chart", "title": "TruRisk Score by Industry", "source": "AVG(Account.TruRisk_Score__c) GROUP BY Account.Industry"},
+        {"type": "Chart", "title": "TruRisk Score Trend (6 months)", "source": "AVG(Account.TruRisk_Score__c) GROUP BY MONTH(TODAY())"},
+        {"type": "Table", "title": "Accounts with Improving Risk Posture", "source": "FILTER Account WHERE Risk_Posture_Trend__c = 'Improving'"}
+      ]
+    }
+  },
+  "serviceConsole": {
+    "components": {
+      "SecurityCustomerSnapshot": {
+        "position": "Right_Sidebar",
+        "fields": [
+          "Account.Name",
+          "Account.Customer_Tier__c",
+          "Account.Customer_Health_Score__c",
+          "Account.Active_Products__c",
+          "Account.Days_To_Renewal__c",
+          "Account.Current_Contract_Value__c",
+          "Account.Total_Assets_Monitored__c",
+          "Account.TruRisk_Score__c",
+          "Account.Vulnerability_Trend_30days__c"
+        ]
+      },
+      "SecurityContactInsight": {
+        "position": "Right_Sidebar",
+        "fields": [
+          "Contact.Name",
+          "Contact.Security_Team_Role__c",
+          "Contact.Decision_Authority__c",
+          "Contact.Technical_Expertise_Level__c",
+          "Contact.Qualys_Certification_Level__c",
+          "Contact.Historical_Sentiment__c",
+          "Contact.Case_History_Summary__c",
+          "Contact.Security_Priorities__c"
+        ]
+      },
+      "SecurityObjectivesPanel": {
+        "position": "Right_Sidebar",
+        "fields": [
+          "Security_Objective__c.Objective_Category__c",
+          "Security_Objective__c.Status__c",
+          "Security_Objective__c.Target_Date__c",
+          "Security_Objective__c.Progress_Percentage__c",
+          "Security_Objective__c.Current_Security_Posture__c"
+        ]
+      },
+      "QualysSolutionsPanel": {
+        "position": "Bottom_Sidebar",
+        "fields": [
+          "Qualys_Solution_Recommendation__c.Solution_Name__c",
+          "Qualys_Solution_Recommendation__c.Products_Included__c",
+          "Qualys_Solution_Recommendation__c.Value_Proposition__c",
+          "Qualys_Solution_Recommendation__c.Time_To_Value__c"
+        ]
+      },
+      "SecurityValueCaptureTool": {
+        "position": "Case_Detail",
+        "fields": [
+          "Case.Security_Value_Category__c",
+          "Case.Security_Value_Amount__c",
+          "Case.Value_Calculation_Method__c",
+          "Case.CVSS_Score__c",
+          "Case.Number_of_Affected_Assets__c"
+        ]
+      },
+      "VulnerabilityContext": {
+        "position": "Case_Detail",
+        "fields": [
+          "Vulnerability__c.QID__c",
+          "Vulnerability__c.CVE_ID__c",
+          "Vulnerability__c.Title__c",
+          "Vulnerability__c.CVSS_Score__c",
+          "Vulnerability__c.Severity__c",
+          "Vulnerability__c.Patch_Available__c",
+          "Vulnerability__c.Workaround_Available__c",
+          "Vulnerability__c.False_Positive_Rate__c"
+        ]
+      },
+      "AssetInventorySnapshot": {
+        "position": "Bottom_Sidebar",
+        "fields": [
+          "Account.Total_Assets_Monitored__c",
+          "Account.Total_Assets_By_Category__c",
+          "Account.Average_Asset_Scan_Frequency__c"
+        ]
+      }
+    },
+    "macros": {
+      "CalculateVulnerabilityImpactValue": {
+        "description": "Calculate security value from vulnerability remediation",
+        "actions": [
+          {"type": "FieldUpdate", "field": "Security_Value_Category__c", "value": "Vulnerability Mitigation"},
+          {"type": "FieldUpdate", "field": "Value_Calculation_Method__c", "value": "Risk Exposure Reduction"},
+          {"type": "RunFormula", "target": "Security_Value_Amount__c", "formula": "Number_of_Affected_Assets__c * CVSS_Score__c * 1000"}
+        ]
+      },
+      "IdentifySecurityExpansion": {
+        "description": "Create security expansion opportunity from case",
+        "actions": [
+          {"type": "CreateRecord", "object": "Opportunity", "fields": {
+            "Name": "{!Account.Name} - {!Product_Affected__c} Expansion",
+            "AccountId": "{!AccountId}",
+            "Type": "Add-On",
+            "StageName": "Qualification",
+            "CloseDate": "TODAY()+90",
+            "Products_Of_Interest__c": "{!Product_Affected__c}",
+            "Case_Originated__c": "true",
+            "Originating_Case_ID__c": "{!CaseId}",
+            "Security_Challenge_Addressed__c": "Vulnerability Management"
+          }},
+          {"type": "FieldUpdate", "field": "Expansion_Opportunity__c", "value": "{!OpportunityId}"}
+        ]
+      },
+      "CompleteComplianceValue": {
+        "description": "Calculate value from compliance maintenance",
+        "actions": [
+          {"type": "FieldUpdate", "field": "Security_Value_Category__c", "value": "Compliance Achievement"},
+          {"type": "FieldUpdate", "field": "Value_Calculation_Method__c", "value": "Standard Qualys Formula"},
+          {"type": "RunFormula", "target": "Security_Value_Amount__c", "formula": "IF(CONTAINS(Compliance_Frameworks_Affected__c, 'PCI DSS'), 25000, IF(CONTAINS(Compliance_Frameworks_Affected__c, 'HIPAA'), 30000, 15000))"}
+        ]
+      },
+      "AttachVulnerabilityDetails": {
+        "description": "Lookup and attach vulnerability details to case",
+        "actions": [
+          {"type": "QueryRecord", "object": "Vulnerability__c", "condition": "QID__c = '{!Case.QID__c}'"},
+          {"type": "FieldUpdate", "field": "CVSS_Score__c", "value": "{!Vulnerability__c.CVSS_Score__c}"},
+          {"type": "FieldUpdate", "field": "Severity__c", "value": "{!Vulnerability__c.Severity__c}"}
+        ]
+      }
+    }
+  },
+  "lightningFlows": {
+    "SecurityValueAssessment": {
+      "description": "Guides agent through security value capture",
+      "screens": [
+        {
+          "name": "SecurityValueIdentificationScreen",
+          "fields": [
+            "Security_Value_Category__c",
+            "Value_Calculation_Method__c",
+            "Number_of_Affected_Assets__c",
+            "CVSS_Score__c"
+          ]
+        },
+        {
+          "name": "SecurityValueCalculationScreen",
+          "fields": [
+            "Security_Value_Amount__c"
+          ],
+          "calculatedFields": [
+            {
+              "field": "Security_Value_Amount__c",
+              "formula": "IF(Value_Calculation_Method__c = 'Risk Exposure Reduction', Number_of_Affected_Assets__c * CVSS_Score__c * 1000, IF(Value_Calculation_Method__c = 'Customer MTTR Improvement', Number_of_Affected_Assets__c * 500, 0))"
+            }
+          ]
+        },
+        {
+          "name": "SecurityExpansionScreen",
+          "fields": [
+            "Training_Need_Identified__c",
+            "Product_Feedback_Captured__c"
+          ]
+        }
+      ]
+    },
+    "CustomerSecurityContext": {
+      "description": "Shows agent complete security context on case acceptance",
+      "screens": [
+        {
+          "name": "AccountSecurityOverview",
+          "fields": [
+            "Account.Name", 
+            "Account.Customer_Tier__c",
+            "Account.Customer_Health_Score__c",
+            "Account.Days_To_Renewal__c",
+            "Account.TruRisk_Score__c",
+            "Account.Vulnerability_Trend_30days__c"
+          ]
+        },
+        {
+          "name": "SecurityContactDetails",
+          "fields": [
+            "Contact.Name",
+            "Contact.Security_Team_Role__c", 
+            "Contact.Decision_Authority__c",
+            "Contact.Technical_Expertise_Level__c",
+            "Contact.Historical_Sentiment__c",
+            "Contact.Qualys_Certification_Level__c"
+          ]
+        },
+        {
+          "name": "CustomerSecurityObjectives",
+          "fields": [
+            "Security_Objective__c.Objective_Category__c",
+            "Security_Objective__c.Status__c", 
+            "Security_Objective__c.Progress_Percentage__c",
+            "Security_Objective__c.Current_Security_Posture__c"
+          ]
+        }
+      ]
+    },
+    "VulnerabilityRemediation": {
+      "description": "Guides agent through vulnerability remediation process",
+      "screens": [
+        {
+          "name": "VulnerabilityIdentification",
+          "fields": [
+            "QID__c",
+            "CVE_ID__c",
+            "CVSS_Score__c"
+          ]
+        },
+        {
+          "name": "RemediationOptions",
+          "fields": [
+            "Patch_Deployment_Status__c",
+            "Remediation_Step_Taken__c"
+          ]
+        },
+        {
+          "name": "ImpactAssessment",
+          "fields": [
+            "Number_of_Affected_Assets__c",
+            "Compliance_Frameworks_Affected__c"
+          ]
+        }
+      ]
+    }
+  },
+  "integrations": {
+    "QualysVMDR": {
+      "direction": "Bidirectional",
+      "objects": ["Case", "Security_Value_Metric__c", "Vulnerability__c"],
+      "triggers": [
+        {
+          "event": "Critical Vulnerability Detected",
+          "action": "Create Case",
+          "mappings": {
+            "Product_Affected__c": "VMDR",
+            "Severity__c": "Vulnerability Severity",
+            "QID__c": "Qualys QID",
+            "Vulnerability_ID__c": "CVE ID",
+            "Number_of_Affected_Assets__c": "Asset Count"
+          }
+        },
+        {
+          "event": "Case Resolved",
+          "action": "Update Vulnerability Status in VMDR",
+          "mappings": {
+            "Resolution_Status": "Case.Status",
+            "Resolution_Notes": "Case.Comments",
+            "False_Positive": "Case.False_Positive_Dispute__c"
+          }
+        }
+      ]
+    },
+    "QualysCloudAgent": {
+      "direction": "Inbound",
+      "objects": ["Case", "Account"],
+      "triggers": [
+        {
+          "event": "Agent Offline Alert",
+          "action": "Create Case",
+          "mappings": {
+            "Product_Affected__c": "Source Product",
+            "Severity__c": "P2 - High",
+            "Agent_Version__c": "Agent Version",
+            "Last_Heartbeat_Timestamp__c": "Last Heartbeat"
+          }
+        }
+      ]
+    },
+    "QualysSupportPhone": {
+      "direction": "Inbound",
+      "objects": ["Case", "Contact"],
+      "triggers": [
+        {
+          "event": "Inbound Support Call",
+          "action": "Screen Pop with Security Customer Context",
+          "mappings": {
+            "CallerID": "Contact.Phone",
+            "DisplayFlow": "CustomerSecurityContext"
+          }
+        }
+      ]
+    },
+    "QualysTruRiskAPI": {
+      "direction": "Bidirectional",
+      "objects": ["Account", "Security_Value_Metric__c"],
+      "triggers": [
+        {
+          "event": "TruRisk Score Update",
+          "action": "Update Account",
+          "mappings": {
+            "TruRisk_Score__c": "Current TruRisk Score",
+            "Risk_Posture_Trend__c": "Risk Trend Direction"
+          }
+        }
+      ]
+    }
+  },
+  "mobileConfigurations": {
+    "QualysSupportApp": {
+      "objects": ["Case", "Account", "Contact", "Security_Value_Metric__c"],
+      "layouts": [
+        {
+          "name": "SupportAgentMobileHome",
+          "components": [
+            "MyOpenCases",
+            "CriticalAlerts",
+            "CustomerHealthScores"
+          ]
+        },
+        {
+          "name": "MobileSecurityValueCapture",
+          "components": [
+            "SecurityValueCalculator",
+            "CustomerSecurityContext"
+          ]
+        }
+      ]
+    },
+    "QualysSalesApp": {
+      "objects": ["Opportunity", "Account", "Contact", "Security_Value_Metric__c"],
+      "layouts": [
+        {
+          "name": "SecuritySalesDashboard",
+          "components": [
+            "CustomerTruRiskScores",
+            "SecurityValueGenerated",
+            "RenewalRiskAlerts"
+          ]
+        }
+      ]
+    }
+  },
+  "communityPortal": {
+    "CustomerSecurityPortal": {
+      "tabs": [
+        {
+          "name": "MyCases",
+          "components": [
+            "ActiveCases",
+            "ResolvedCases",
+            "CreateCase"
+          ]
+        },
+        {
+          "name": "SecurityValue",
+          "components": [
+            "ValueByProduct",
+            "ValueTrend",
+            "SecurityObjectivesProgress"
+          ]
+        },
+        {
+          "name": "VulnerabilityManagement",
+          "components": [
+            "VulnerabilityTrend",
+            "TopVulnerabilities",
+            "PatchStatus"
+          ]
+        },
+        {
+          "name": "ComplianceDashboard",
+          "components": [
+            "ComplianceStatus",
+            "AuditReadiness",
+            "ControlEffectiveness"
+          ]
+        }
+      ]
+    }
+  },
+  "predefinedSecurityValueReports": {
+    "MonthlySecurityROI": {
+      "description": "Monthly summary of security value delivered by Qualys products",
+      "sections": [
+        {
+          "title": "Executive Summary",
+          "elements": [
+            "Total Security Value Generated ($)",
+            "Critical Vulnerabilities Remediated",
+            "Mean Time to Remediate Improvement (%)",
+            "Value by Security Need Addressed"
+          ]
+        },
+        {
+          "title": "Value By Qualys Product",
+          "elements": [
+            "VMDR Value",
+            "WAS Value",
+            "Container Security Value",
+            "Policy Compliance Value",
+            "Other Products Value"
+          ]
+        },
+        {
+          "title": "Security Posture Improvements",
+          "elements": [
+            "TruRisk Score Trend",
+            "External Attack Surface Reduction",
+            "Security Debt Reduction"
+          ]
+        }
+      ]
+    },
+    "QuarterlySecurityBusinessReview": {
+      "description": "Quarterly business review for security customer accounts",
+      "sections": [
+        {
+          "title": "Account Health",
+          "elements": [
+            "Overall Health Score",
+            "Product Adoption Metrics",
+            "Support Case Trend",
+            "CSAT Trend"
+          ]
+        },
+        {
+          "title": "Security Value Delivered",
+          "elements": [
+            "Quarterly Value Generated",
+            "YTD Value Generated",
+            "Mean Time to Detect Improvement",
+            "Mean Time to Remediate Improvement",
+            "Compliance Status"
+          ]
+        },
+        {
+          "title": "Growth Opportunities",
+          "elements": [
+            "Security Gaps Identified",
+            "Recommended Solution Paths",
+            "Expansion Opportunities"
+          ]
+        }
+      ]
+    }
+  }
+}
