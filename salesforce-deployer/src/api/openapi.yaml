@@ -1,0 +1,2532 @@
+openapi: 3.0.3
+info:
+  contact:
+    email: your.email@example.com
+  description: |-
+    API for extracting, managing, and deploying Salesforce metadata schemas.
+    This API enables seamless management of Salesforce configurations across environments.
+  license:
+    name: MIT
+  title: Salesforce Schema Deployer API
+  version: 0.1.0
+servers:
+- description: Development server
+  url: http://localhost:8000/api/v1
+- description: Mock server for testing
+  url: http://localhost:8001/api/v1
+tags:
+- description: Authentication operations
+  name: authentication
+- description: Schema extraction and management
+  name: schemas
+- description: Salesforce deployment operations
+  name: deployment
+- description: Metadata component management
+  name: metadata
+- description: Schema validation operations
+  name: validation
+- description: Salesforce organization management
+  name: organizations
+paths:
+  /auth/login:
+    post:
+      description: "Authenticates a user with their Salesforce username, password,\
+        \ and optional security token to obtain an access token for API access."
+      operationId: authenticateWithCredentials
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+          description: Authentication successful
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication failed
+      summary: Authenticate with Salesforce credentials
+      tags:
+      - authentication
+  /auth/oauth:
+    post:
+      description: "Authenticates using the OAuth 2.0 protocol, supporting both web\
+        \ server flow (with auth code) and username-password flow for headless integrations."
+      operationId: authenticateWithOAuth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+          description: Authentication successful
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication failed
+      summary: Authenticate using OAuth 2.0
+      tags:
+      - authentication
+  /auth/refresh:
+    post:
+      description: Obtains a new access token using a valid refresh token when the
+        current token has expired or is about to expire.
+      operationId: refreshToken
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+          description: Token refreshed successfully
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid or expired refresh token
+      security:
+      - BearerAuth: []
+      summary: Refresh authentication token
+      tags:
+      - authentication
+  /schemas/extract:
+    post:
+      description: "Extracts metadata schema components from a specified Salesforce\
+        \ organization, with options to filter by component types and include standard\
+        \ or managed components."
+      operationId: extractSchema
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SchemaExtractionRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaExtractionResponse'
+          description: Schema extraction successful
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+      security:
+      - BearerAuth: []
+      summary: Extract schema from a Salesforce organization
+      tags:
+      - schemas
+  /schemas/{schemaId}:
+    delete:
+      description: Permanently removes a schema definition and all its associated
+        metadata components from the system.
+      operationId: deleteSchema
+      parameters:
+      - explode: false
+        in: path
+        name: schemaId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Schema deleted successfully
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Schema not found
+      security:
+      - BearerAuth: []
+      summary: Delete schema by ID
+      tags:
+      - schemas
+    get:
+      description: "Retrieves the complete metadata schema definition by its unique\
+        \ identifier, including all component definitions and relationships."
+      operationId: getSchema
+      parameters:
+      - explode: false
+        in: path
+        name: schemaId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schema'
+          description: Schema found
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Schema not found
+      security:
+      - BearerAuth: []
+      summary: Get schema by ID
+      tags:
+      - schemas
+    put:
+      description: "Updates an existing schema definition with new metadata components,\
+        \ properties, or relationships while preserving its identifier."
+      operationId: updateSchema
+      parameters:
+      - explode: false
+        in: path
+        name: schemaId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Schema'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schema'
+          description: Schema updated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Schema not found
+      security:
+      - BearerAuth: []
+      summary: Update schema by ID
+      tags:
+      - schemas
+  /schemas/compare:
+    post:
+      description: "Performs a detailed comparison between two schemas, identifying\
+        \ added, modified, and removed components with field-level change tracking."
+      operationId: compareSchemas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SchemaComparisonRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaComparisonResponse'
+          description: Schema comparison completed
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request
+      security:
+      - BearerAuth: []
+      summary: Compare two schemas
+      tags:
+      - schemas
+  /schemas/validate:
+    post:
+      description: "Analyzes a schema for validity, checking component dependencies,\
+        \ references, and compatibility with target Salesforce organizations."
+      operationId: validateSchema
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SchemaValidationRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaValidationResponse'
+          description: Schema validation completed
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request
+      security:
+      - BearerAuth: []
+      summary: Validate a schema
+      tags:
+      - validation
+  /deployments:
+    post:
+      description: Initiates a deployment process to apply schema changes to a target
+        Salesforce organization with configurable validation and rollback options.
+      operationId: deploySchema
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeploymentRequest'
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentResponse'
+          description: Deployment started
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+      security:
+      - BearerAuth: []
+      summary: Deploy schema to a Salesforce organization
+      tags:
+      - deployment
+  /deployments/{deploymentId}:
+    get:
+      description: "Retrieves the current status, progress, and results of an ongoing\
+        \ or completed deployment operation."
+      operationId: getDeploymentStatus
+      parameters:
+      - explode: false
+        in: path
+        name: deploymentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentStatus'
+          description: Deployment status found
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deployment not found
+      security:
+      - BearerAuth: []
+      summary: Get deployment status by ID
+      tags:
+      - deployment
+  /deployments/{deploymentId}/cancel:
+    post:
+      description: "Attempts to cancel an in-progress deployment operation, rolling\
+        \ back any changes if possible based on the deployment phase."
+      operationId: cancelDeployment
+      parameters:
+      - explode: false
+        in: path
+        name: deploymentId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentStatus'
+          description: Deployment cancelled successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deployment cannot be cancelled
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deployment not found
+      security:
+      - BearerAuth: []
+      summary: Cancel a deployment
+      tags:
+      - deployment
+  /metadata/objects:
+    get:
+      description: Retrieves a list of all available objects from either a stored
+        schema or directly from a connected Salesforce organization.
+      operationId: getObjects
+      parameters:
+      - description: "ID of the schema to get objects from. If not provided, objects\
+          \ from the connected Salesforce org will be returned."
+        explode: true
+        in: query
+        name: schemaId
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ObjectMetadata'
+                type: array
+          description: List of objects retrieved successfully
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+      security:
+      - BearerAuth: []
+      summary: Get a list of objects
+      tags:
+      - metadata
+  /metadata/objects/{objectName}:
+    get:
+      description: "Fetches comprehensive metadata for a specific object, including\
+        \ its fields, relationships, and configuration properties."
+      operationId: getObjectByName
+      parameters:
+      - explode: false
+        in: path
+        name: objectName
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: "ID of the schema to get the object from. If not provided, the\
+          \ object from the connected Salesforce org will be returned."
+        explode: true
+        in: query
+        name: schemaId
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectMetadata'
+          description: Object details retrieved successfully
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Object not found
+      security:
+      - BearerAuth: []
+      summary: Get object details by name
+      tags:
+      - metadata
+  /metadata/objects/{objectName}/fields:
+    get:
+      description: "Returns a list of all fields defined for a specific object, with\
+        \ their data types, validation rules, and relationships."
+      operationId: getObjectFields
+      parameters:
+      - explode: false
+        in: path
+        name: objectName
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: "ID of the schema to get fields from. If not provided, fields\
+          \ from the connected Salesforce org will be returned."
+        explode: true
+        in: query
+        name: schemaId
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/FieldMetadata'
+                type: array
+          description: Fields retrieved successfully
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Object not found
+      security:
+      - BearerAuth: []
+      summary: Get fields for an object
+      tags:
+      - metadata
+  /organizations:
+    get:
+      description: Retrieves all Salesforce organizations that have been configured
+        for schema extraction and deployment operations.
+      operationId: getOrganizations
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Organization'
+                type: array
+          description: List of organizations retrieved successfully
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+      security:
+      - BearerAuth: []
+      summary: Get a list of connected Salesforce organizations
+      tags:
+      - organizations
+    post:
+      description: "Registers a new Salesforce organization with the system, including\
+        \ connection credentials and organization metadata."
+      operationId: addOrganization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationRequest'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: Organization added successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request
+      security:
+      - BearerAuth: []
+      summary: Add a new Salesforce organization
+      tags:
+      - organizations
+  /organizations/{orgId}:
+    delete:
+      description: "Removes a Salesforce organization from the system, including all\
+        \ stored credentials and connection information."
+      operationId: deleteOrganization
+      parameters:
+      - explode: false
+        in: path
+        name: orgId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Organization deleted successfully
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Organization not found
+      security:
+      - BearerAuth: []
+      summary: Delete organization
+      tags:
+      - organizations
+    get:
+      description: "Retrieves detailed information about a specific Salesforce organization,\
+        \ including its connection status and metadata."
+      operationId: getOrganizationById
+      parameters:
+      - explode: false
+        in: path
+        name: orgId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: Organization details retrieved successfully
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Organization not found
+      security:
+      - BearerAuth: []
+      summary: Get organization details by ID
+      tags:
+      - organizations
+    put:
+      description: "Updates the configuration, credentials, or metadata for an existing\
+        \ Salesforce organization connection."
+      operationId: updateOrganization
+      parameters:
+      - explode: false
+        in: path
+        name: orgId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: Organization updated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Organization not found
+      security:
+      - BearerAuth: []
+      summary: Update organization details
+      tags:
+      - organizations
+components:
+  schemas:
+    LoginRequest:
+      example:
+        securityToken: ABCDEFGHIJKLMNOP
+        password: myPassword123
+        username: user@example.com
+        instanceUrl: https://login.salesforce.com
+      properties:
+        username:
+          description: Salesforce username
+          example: user@example.com
+          title: username
+          type: string
+        password:
+          description: Salesforce password
+          example: myPassword123
+          format: password
+          title: password
+          type: string
+        securityToken:
+          description: Salesforce security token
+          example: ABCDEFGHIJKLMNOP
+          title: securityToken
+          type: string
+        instanceUrl:
+          description: Salesforce instance URL
+          example: https://login.salesforce.com
+          title: instanceUrl
+          type: string
+      required:
+      - password
+      - username
+      title: LoginRequest
+      type: object
+    OAuthRequest:
+      example:
+        redirectUri: https://localhost:8000/callback
+        password: myPassword123
+        clientId: 3MVG9e2mBbZnmcolVXiRm8YNot7VI5W_oiqJuBDdDUNF9s45MfoiV2h_nI2paMT1QA_yw3UxQncI7Goz8L1A7
+        authCode: aPrxJZTWTs65VeNEEhYht92nXyz
+        clientSecret: "123456789012345678"
+        username: user@example.com
+      properties:
+        clientId:
+          description: OAuth client ID
+          example: 3MVG9e2mBbZnmcolVXiRm8YNot7VI5W_oiqJuBDdDUNF9s45MfoiV2h_nI2paMT1QA_yw3UxQncI7Goz8L1A7
+          title: clientId
+          type: string
+        clientSecret:
+          description: OAuth client secret
+          example: "123456789012345678"
+          title: clientSecret
+          type: string
+        redirectUri:
+          description: OAuth redirect URI
+          example: https://localhost:8000/callback
+          title: redirectUri
+          type: string
+        authCode:
+          description: OAuth authorization code (required if not using username/password
+            flow)
+          example: aPrxJZTWTs65VeNEEhYht92nXyz
+          title: authCode
+          type: string
+        username:
+          description: Salesforce username (required if using username/password flow)
+          example: user@example.com
+          title: username
+          type: string
+        password:
+          description: Salesforce password (required if using username/password flow)
+          example: myPassword123
+          format: password
+          title: password
+          type: string
+      required:
+      - clientId
+      - clientSecret
+      title: OAuthRequest
+      type: object
+    AuthenticationResponse:
+      example:
+        expiresIn: 3600
+        accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        instanceUrl: https://na1.salesforce.com
+      properties:
+        accessToken:
+          description: JWT access token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+          title: accessToken
+          type: string
+        refreshToken:
+          description: JWT refresh token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+          title: refreshToken
+          type: string
+        instanceUrl:
+          description: Salesforce instance URL
+          example: https://na1.salesforce.com
+          title: instanceUrl
+          type: string
+        expiresIn:
+          description: Token expiration time in seconds
+          example: 3600
+          title: expiresIn
+          type: integer
+      required:
+      - accessToken
+      - instanceUrl
+      title: AuthenticationResponse
+      type: object
+    ErrorResponse:
+      example:
+        details:
+        - field: username
+          message: Field is required
+        - field: username
+          message: Field is required
+        error: INVALID_SESSION_ID
+        message: Session expired or invalid
+      properties:
+        error:
+          description: Error code
+          example: INVALID_SESSION_ID
+          title: error
+          type: string
+        message:
+          description: Error message
+          example: Session expired or invalid
+          title: message
+          type: string
+        details:
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorResponse_details_inner'
+          title: details
+          type: array
+      required:
+      - error
+      - message
+      title: ErrorResponse
+      type: object
+    SchemaExtractionRequest:
+      example:
+        includeStandard: false
+        includeManaged: false
+        filter: "CustomObject:Account,Contact"
+        components:
+        - objects
+        - objects
+        orgId: 123e4567-e89b-12d3-a456-426614174000
+      properties:
+        orgId:
+          description: ID of the organization to extract schema from
+          example: 123e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: orgId
+          type: string
+        components:
+          description: "List of components to extract. If not provided, all components\
+            \ will be extracted."
+          items:
+            enum:
+            - objects
+            - fields
+            - workflows
+            - dashboards
+            - flows
+            example: objects
+            type: string
+          title: components
+          type: array
+        includeStandard:
+          default: false
+          description: Whether to include standard objects
+          title: includeStandard
+          type: boolean
+        includeManaged:
+          default: false
+          description: Whether to include managed package components
+          title: includeManaged
+          type: boolean
+        filter:
+          description: Filter expression to limit extracted components
+          example: "CustomObject:Account,Contact"
+          title: filter
+          type: string
+      required:
+      - orgId
+      title: SchemaExtractionRequest
+      type: object
+    SchemaExtractionResponse:
+      example:
+        stats:
+          flows: 2
+          objects: 10
+          workflows: 5
+          fields: 50
+          dashboards: 3
+        schemaId: 123e4567-e89b-12d3-a456-426614174000
+        progress: 100
+        message: Schema extraction completed successfully
+        status: completed
+      properties:
+        schemaId:
+          description: ID of the extracted schema
+          example: 123e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: schemaId
+          type: string
+        status:
+          description: Status of the extraction process
+          enum:
+          - completed
+          - in_progress
+          - failed
+          example: completed
+          title: status
+          type: string
+        progress:
+          description: Progress percentage
+          example: 100
+          maximum: 100
+          minimum: 0
+          title: progress
+          type: integer
+        message:
+          description: Additional information
+          example: Schema extraction completed successfully
+          title: message
+          type: string
+        stats:
+          $ref: '#/components/schemas/SchemaExtractionResponse_stats'
+      required:
+      - schemaId
+      - status
+      title: SchemaExtractionResponse
+      type: object
+    Schema:
+      example:
+        createdAt: 2025-04-21T14:30:00Z
+        components:
+          workflowRules:
+            key:
+              criteria: Account.Status__c = 'Active'
+              name: Account_Status_Update
+              active: true
+              description: Updates Account status based on criteria
+              actions:
+              - field: Status__c
+                name: UpdateAccountStatus
+                type: FieldUpdate
+                value: Processed
+              - field: Status__c
+                name: UpdateAccountStatus
+                type: FieldUpdate
+                value: Processed
+              object: Account
+          flows:
+            key:
+              name: Lead_Process
+              description: Automates lead qualification
+              label: Lead Qualification Process
+              processType: AutoLaunchedFlow
+              triggerType: ""
+              eventType: ""
+              status: Active
+          objects:
+            key:
+              custom: false
+              name: Account
+              description: Standard Account object
+              nameField: Name
+              label: Account
+              fields:
+                key:
+                  relationshipName: ""
+                  defaultValue: Default value
+                  unique: false
+                  name: CustomField__c
+                  length: 255
+                  externalId: false
+                  description: A custom text field
+                  formula: ""
+                  label: Custom Field
+                  type: Text
+                  required: false
+                  referenceTo: ""
+              sharingModel: ReadWrite
+          dashboards:
+            key:
+              components:
+              - reportName: SalesReport
+                name: SalesChart
+                type: Chart
+              - reportName: SalesReport
+                name: SalesChart
+                type: Chart
+              name: Sales_Dashboard
+              description: Key sales metrics dashboard
+              label: Sales Performance
+              folderName: Sales Dashboards
+        apiVersion: "56.0"
+        sourceOrgId: 123e4567-e89b-12d3-a456-426614174000
+        name: Production Schema April 2025
+        description: Current production schema as of April 2025
+        id: 123e4567-e89b-12d3-a456-426614174000
+        updatedAt: 2025-04-21T14:30:00Z
+      properties:
+        id:
+          description: Schema ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: id
+          type: string
+        name:
+          description: Schema name
+          example: Production Schema April 2025
+          title: name
+          type: string
+        description:
+          description: Schema description
+          example: Current production schema as of April 2025
+          title: description
+          type: string
+        createdAt:
+          description: Schema creation timestamp
+          example: 2025-04-21T14:30:00Z
+          format: date-time
+          title: createdAt
+          type: string
+        updatedAt:
+          description: Schema last update timestamp
+          example: 2025-04-21T14:30:00Z
+          format: date-time
+          title: updatedAt
+          type: string
+        sourceOrgId:
+          description: ID of the source organization
+          example: 123e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: sourceOrgId
+          type: string
+        apiVersion:
+          description: Salesforce API version
+          example: "56.0"
+          title: apiVersion
+          type: string
+        components:
+          $ref: '#/components/schemas/Schema_components'
+      required:
+      - id
+      - name
+      title: Schema
+      type: object
+    SchemaComparisonRequest:
+      example:
+        components:
+        - objects
+        - objects
+        sourceSchemaId: 123e4567-e89b-12d3-a456-426614174000
+        targetSchemaId: 223e4567-e89b-12d3-a456-426614174000
+      properties:
+        sourceSchemaId:
+          description: ID of the source schema
+          example: 123e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: sourceSchemaId
+          type: string
+        targetSchemaId:
+          description: ID of the target schema
+          example: 223e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: targetSchemaId
+          type: string
+        components:
+          description: "List of components to compare. If not provided, all components\
+            \ will be compared."
+          items:
+            enum:
+            - objects
+            - fields
+            - workflows
+            - dashboards
+            - flows
+            example: objects
+            type: string
+          title: components
+          type: array
+      required:
+      - sourceSchemaId
+      - targetSchemaId
+      title: SchemaComparisonRequest
+      type: object
+    SchemaComparisonResponse:
+      example:
+        differences:
+        - componentType: field
+          changeType: modified
+          targetValue: "{}"
+          targetPath: objects.Account.fields.CustomField__c
+          componentName: Account.CustomField__c
+          sourceValue: "{}"
+          sourcePath: objects.Account.fields.CustomField__c
+          fieldChanges:
+          - field: length
+            changeType: modified
+            targetValue:
+              length: 255
+            sourceValue:
+              length: 80
+          - field: length
+            changeType: modified
+            targetValue:
+              length: 255
+            sourceValue:
+              length: 80
+        - componentType: field
+          changeType: modified
+          targetValue: "{}"
+          targetPath: objects.Account.fields.CustomField__c
+          componentName: Account.CustomField__c
+          sourceValue: "{}"
+          sourcePath: objects.Account.fields.CustomField__c
+          fieldChanges:
+          - field: length
+            changeType: modified
+            targetValue:
+              length: 255
+            sourceValue:
+              length: 80
+          - field: length
+            changeType: modified
+            targetValue:
+              length: 255
+            sourceValue:
+              length: 80
+      properties:
+        differences:
+          items:
+            $ref: '#/components/schemas/SchemaComparisonResponse_differences_inner'
+          title: differences
+          type: array
+      required:
+      - differences
+      title: SchemaComparisonResponse
+      type: object
+    SchemaValidationRequest:
+      example:
+        schema:
+          createdAt: 2025-04-21T14:30:00Z
+          components:
+            workflowRules:
+              key:
+                criteria: Account.Status__c = 'Active'
+                name: Account_Status_Update
+                active: true
+                description: Updates Account status based on criteria
+                actions:
+                - field: Status__c
+                  name: UpdateAccountStatus
+                  type: FieldUpdate
+                  value: Processed
+                - field: Status__c
+                  name: UpdateAccountStatus
+                  type: FieldUpdate
+                  value: Processed
+                object: Account
+            flows:
+              key:
+                name: Lead_Process
+                description: Automates lead qualification
+                label: Lead Qualification Process
+                processType: AutoLaunchedFlow
+                triggerType: ""
+                eventType: ""
+                status: Active
+            objects:
+              key:
+                custom: false
+                name: Account
+                description: Standard Account object
+                nameField: Name
+                label: Account
+                fields:
+                  key:
+                    relationshipName: ""
+                    defaultValue: Default value
+                    unique: false
+                    name: CustomField__c
+                    length: 255
+                    externalId: false
+                    description: A custom text field
+                    formula: ""
+                    label: Custom Field
+                    type: Text
+                    required: false
+                    referenceTo: ""
+                sharingModel: ReadWrite
+            dashboards:
+              key:
+                components:
+                - reportName: SalesReport
+                  name: SalesChart
+                  type: Chart
+                - reportName: SalesReport
+                  name: SalesChart
+                  type: Chart
+                name: Sales_Dashboard
+                description: Key sales metrics dashboard
+                label: Sales Performance
+                folderName: Sales Dashboards
+          apiVersion: "56.0"
+          sourceOrgId: 123e4567-e89b-12d3-a456-426614174000
+          name: Production Schema April 2025
+          description: Current production schema as of April 2025
+          id: 123e4567-e89b-12d3-a456-426614174000
+          updatedAt: 2025-04-21T14:30:00Z
+        targetOrgId: 223e4567-e89b-12d3-a456-426614174000
+        strictValidation: false
+        schemaId: 123e4567-e89b-12d3-a456-426614174000
+        checkDependencies: true
+      properties:
+        schema:
+          $ref: '#/components/schemas/Schema'
+        schemaId:
+          description: ID of the schema to validate (alternative to providing the
+            full schema)
+          example: 123e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: schemaId
+          type: string
+        targetOrgId:
+          description: ID of the target organization to validate against (optional)
+          example: 223e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: targetOrgId
+          type: string
+        checkDependencies:
+          default: true
+          description: Whether to check dependencies
+          title: checkDependencies
+          type: boolean
+        strictValidation:
+          default: false
+          description: Whether to perform strict validation
+          title: strictValidation
+          type: boolean
+      title: SchemaValidationRequest
+      type: object
+    SchemaValidationResponse:
+      example:
+        valid: true
+        dependencyGraph:
+          key:
+          - dependencyGraph
+          - dependencyGraph
+        warnings:
+        - severity: error
+          componentType: field
+          path: objects.Account.fields.CustomField__c
+          componentName: Account.CustomField__c
+          message: Field 'CustomField__c' references non-existent object 'NonExistentObject__c'
+        - severity: error
+          componentType: field
+          path: objects.Account.fields.CustomField__c
+          componentName: Account.CustomField__c
+          message: Field 'CustomField__c' references non-existent object 'NonExistentObject__c'
+        errors:
+        - severity: error
+          componentType: field
+          path: objects.Account.fields.CustomField__c
+          componentName: Account.CustomField__c
+          message: Field 'CustomField__c' references non-existent object 'NonExistentObject__c'
+        - severity: error
+          componentType: field
+          path: objects.Account.fields.CustomField__c
+          componentName: Account.CustomField__c
+          message: Field 'CustomField__c' references non-existent object 'NonExistentObject__c'
+      properties:
+        valid:
+          description: Whether the schema is valid
+          example: true
+          title: valid
+          type: boolean
+        errors:
+          description: Validation errors (if any)
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          title: errors
+          type: array
+        warnings:
+          description: Validation warnings
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          title: warnings
+          type: array
+        dependencyGraph:
+          additionalProperties:
+            items:
+              type: string
+            type: array
+          description: Graph of component dependencies
+          title: dependencyGraph
+          type: object
+      required:
+      - valid
+      title: SchemaValidationResponse
+      type: object
+    DeploymentRequest:
+      example:
+        schema:
+          createdAt: 2025-04-21T14:30:00Z
+          components:
+            workflowRules:
+              key:
+                criteria: Account.Status__c = 'Active'
+                name: Account_Status_Update
+                active: true
+                description: Updates Account status based on criteria
+                actions:
+                - field: Status__c
+                  name: UpdateAccountStatus
+                  type: FieldUpdate
+                  value: Processed
+                - field: Status__c
+                  name: UpdateAccountStatus
+                  type: FieldUpdate
+                  value: Processed
+                object: Account
+            flows:
+              key:
+                name: Lead_Process
+                description: Automates lead qualification
+                label: Lead Qualification Process
+                processType: AutoLaunchedFlow
+                triggerType: ""
+                eventType: ""
+                status: Active
+            objects:
+              key:
+                custom: false
+                name: Account
+                description: Standard Account object
+                nameField: Name
+                label: Account
+                fields:
+                  key:
+                    relationshipName: ""
+                    defaultValue: Default value
+                    unique: false
+                    name: CustomField__c
+                    length: 255
+                    externalId: false
+                    description: A custom text field
+                    formula: ""
+                    label: Custom Field
+                    type: Text
+                    required: false
+                    referenceTo: ""
+                sharingModel: ReadWrite
+            dashboards:
+              key:
+                components:
+                - reportName: SalesReport
+                  name: SalesChart
+                  type: Chart
+                - reportName: SalesReport
+                  name: SalesChart
+                  type: Chart
+                name: Sales_Dashboard
+                description: Key sales metrics dashboard
+                label: Sales Performance
+                folderName: Sales Dashboards
+          apiVersion: "56.0"
+          sourceOrgId: 123e4567-e89b-12d3-a456-426614174000
+          name: Production Schema April 2025
+          description: Current production schema as of April 2025
+          id: 123e4567-e89b-12d3-a456-426614174000
+          updatedAt: 2025-04-21T14:30:00Z
+        components:
+        - Account.CustomField__c
+        - Account.CustomField__c
+        targetOrgId: 223e4567-e89b-12d3-a456-426614174000
+        schemaId: 123e4567-e89b-12d3-a456-426614174000
+        options:
+          testLevel: NoTestRun
+          ignoreWarnings: false
+          runTests: false
+          rollbackOnError: true
+          autoUpdatePackage: false
+          purgeOnDelete: false
+          checkOnly: false
+      properties:
+        schemaId:
+          description: ID of the schema to deploy
+          example: 123e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: schemaId
+          type: string
+        schema:
+          $ref: '#/components/schemas/Schema'
+        targetOrgId:
+          description: ID of the target organization
+          example: 223e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: targetOrgId
+          type: string
+        components:
+          description: "List of components to deploy. If not provided, all components\
+            \ will be deployed."
+          items:
+            example: Account.CustomField__c
+            type: string
+          title: components
+          type: array
+        options:
+          $ref: '#/components/schemas/DeploymentRequest_options'
+      required:
+      - targetOrgId
+      title: DeploymentRequest
+      type: object
+    DeploymentResponse:
+      example:
+        validationResults:
+          valid: true
+          dependencyGraph:
+            key:
+            - dependencyGraph
+            - dependencyGraph
+          warnings:
+          - severity: error
+            componentType: field
+            path: objects.Account.fields.CustomField__c
+            componentName: Account.CustomField__c
+            message: Field 'CustomField__c' references non-existent object 'NonExistentObject__c'
+          - severity: error
+            componentType: field
+            path: objects.Account.fields.CustomField__c
+            componentName: Account.CustomField__c
+            message: Field 'CustomField__c' references non-existent object 'NonExistentObject__c'
+          errors:
+          - severity: error
+            componentType: field
+            path: objects.Account.fields.CustomField__c
+            componentName: Account.CustomField__c
+            message: Field 'CustomField__c' references non-existent object 'NonExistentObject__c'
+          - severity: error
+            componentType: field
+            path: objects.Account.fields.CustomField__c
+            componentName: Account.CustomField__c
+            message: Field 'CustomField__c' references non-existent object 'NonExistentObject__c'
+        deploymentId: 123e4567-e89b-12d3-a456-426614174000
+        message: Deployment queued successfully
+        status: queued
+      properties:
+        deploymentId:
+          description: Deployment ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: deploymentId
+          type: string
+        status:
+          description: Deployment status
+          enum:
+          - queued
+          - in_progress
+          - completed
+          - failed
+          - cancelled
+          example: queued
+          title: status
+          type: string
+        message:
+          description: Additional information
+          example: Deployment queued successfully
+          title: message
+          type: string
+        validationResults:
+          $ref: '#/components/schemas/SchemaValidationResponse'
+      required:
+      - deploymentId
+      - status
+      title: DeploymentResponse
+      type: object
+    DeploymentStatus:
+      example:
+        deploymentId: 123e4567-e89b-12d3-a456-426614174000
+        progress: 75
+        startTime: 2025-04-21T14:30:00Z
+        endTime: 2025-04-21T14:35:00Z
+        message: Deployment in progress
+        results:
+          apexTestResults:
+          - testRunStatus: Passed
+            testRunId: 123e4567-e89b-12d3-a456-426614174000
+            message: Test completed successfully
+            testRunStackTrace: ""
+            testRunDuration: 0.123456789
+            testRunEndTime: 2025-04-21T14:35:00Z
+            apexClass: MyTestClass
+            testEndTime: 2025-04-21T14:35:00Z
+            testRunStartTime: 2025-04-21T14:30:00Z
+            stackTrace: ""
+            testStartTime: 2025-04-21T14:30:00Z
+            outcome: Passed
+            testDuration: 0.123456789
+            testRunMessage: Test run completed successfully
+          - testRunStatus: Passed
+            testRunId: 123e4567-e89b-12d3-a456-426614174000
+            message: Test completed successfully
+            testRunStackTrace: ""
+            testRunDuration: 0.123456789
+            testRunEndTime: 2025-04-21T14:35:00Z
+            apexClass: MyTestClass
+            testEndTime: 2025-04-21T14:35:00Z
+            testRunStartTime: 2025-04-21T14:30:00Z
+            stackTrace: ""
+            testStartTime: 2025-04-21T14:30:00Z
+            outcome: Passed
+            testDuration: 0.123456789
+            testRunMessage: Test run completed successfully
+          componentErrors:
+          - componentType: CustomField
+            problem: Field creation failed
+            fullName: Account.CustomField__c
+          - componentType: CustomField
+            problem: Field creation failed
+            fullName: Account.CustomField__c
+          success: true
+          componentSuccesses:
+          - componentType: CustomField
+            problem: Field creation failed
+            fullName: Account.CustomField__c
+          - componentType: CustomField
+            problem: Field creation failed
+            fullName: Account.CustomField__c
+          completedDate: 2025-04-21T14:35:00Z
+          componentFailures:
+          - componentType: CustomField
+            problem: Field creation failed
+            fullName: Account.CustomField__c
+          - componentType: CustomField
+            problem: Field creation failed
+            fullName: Account.CustomField__c
+        status: in_progress
+      properties:
+        deploymentId:
+          description: Deployment ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: deploymentId
+          type: string
+        status:
+          description: Deployment status
+          enum:
+          - queued
+          - in_progress
+          - completed
+          - failed
+          - cancelled
+          example: in_progress
+          title: status
+          type: string
+        progress:
+          description: Progress percentage
+          example: 75
+          maximum: 100
+          minimum: 0
+          title: progress
+          type: integer
+        startTime:
+          description: Deployment start time
+          example: 2025-04-21T14:30:00Z
+          format: date-time
+          title: startTime
+          type: string
+        endTime:
+          description: Deployment end time
+          example: 2025-04-21T14:35:00Z
+          format: date-time
+          title: endTime
+          type: string
+        message:
+          description: Additional information
+          example: Deployment in progress
+          title: message
+          type: string
+        results:
+          $ref: '#/components/schemas/DeploymentStatus_results'
+      required:
+      - deploymentId
+      - status
+      title: DeploymentStatus
+      type: object
+    ApexTestResult:
+      example:
+        testRunStatus: Passed
+        testRunId: 123e4567-e89b-12d3-a456-426614174000
+        message: Test completed successfully
+        testRunStackTrace: ""
+        testRunDuration: 0.123456789
+        testRunEndTime: 2025-04-21T14:35:00Z
+        apexClass: MyTestClass
+        testEndTime: 2025-04-21T14:35:00Z
+        testRunStartTime: 2025-04-21T14:30:00Z
+        stackTrace: ""
+        testStartTime: 2025-04-21T14:30:00Z
+        outcome: Passed
+        testDuration: 0.123456789
+        testRunMessage: Test run completed successfully
+      properties:
+        apexClass:
+          example: MyTestClass
+          title: apexClass
+          type: string
+        outcome:
+          enum:
+          - Passed
+          - Failed
+          - Skipped
+          example: Passed
+          title: outcome
+          type: string
+        message:
+          example: Test completed successfully
+          title: message
+          type: string
+        stackTrace:
+          example: ""
+          title: stackTrace
+          type: string
+        testDuration:
+          example: 0.123456789
+          format: float
+          title: testDuration
+          type: number
+        testStartTime:
+          example: 2025-04-21T14:30:00Z
+          format: date-time
+          title: testStartTime
+          type: string
+        testEndTime:
+          example: 2025-04-21T14:35:00Z
+          format: date-time
+          title: testEndTime
+          type: string
+        testRunId:
+          example: 123e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: testRunId
+          type: string
+        testRunStatus:
+          enum:
+          - Passed
+          - Failed
+          - Skipped
+          example: Passed
+          title: testRunStatus
+          type: string
+        testRunMessage:
+          example: Test run completed successfully
+          title: testRunMessage
+          type: string
+        testRunStackTrace:
+          example: ""
+          title: testRunStackTrace
+          type: string
+        testRunDuration:
+          example: 0.123456789
+          format: float
+          title: testRunDuration
+          type: number
+        testRunStartTime:
+          example: 2025-04-21T14:30:00Z
+          format: date-time
+          title: testRunStartTime
+          type: string
+        testRunEndTime:
+          example: 2025-04-21T14:35:00Z
+          format: date-time
+          title: testRunEndTime
+          type: string
+      title: ApexTestResult
+      type: object
+    ComponentResult:
+      example:
+        componentType: CustomField
+        problem: Field creation failed
+        fullName: Account.CustomField__c
+      properties:
+        componentType:
+          example: CustomField
+          title: componentType
+          type: string
+        fullName:
+          example: Account.CustomField__c
+          title: fullName
+          type: string
+        problem:
+          example: Field creation failed
+          title: problem
+          type: string
+      title: ComponentResult
+      type: object
+    ValidationError:
+      example:
+        severity: error
+        componentType: field
+        path: objects.Account.fields.CustomField__c
+        componentName: Account.CustomField__c
+        message: Field 'CustomField__c' references non-existent object 'NonExistentObject__c'
+      properties:
+        message:
+          example: Field 'CustomField__c' references non-existent object 'NonExistentObject__c'
+          title: message
+          type: string
+        severity:
+          enum:
+          - error
+          - warning
+          - info
+          example: error
+          title: severity
+          type: string
+        componentType:
+          example: field
+          title: componentType
+          type: string
+        componentName:
+          example: Account.CustomField__c
+          title: componentName
+          type: string
+        path:
+          example: objects.Account.fields.CustomField__c
+          title: path
+          type: string
+      required:
+      - message
+      title: ValidationError
+      type: object
+    ObjectMetadata:
+      example:
+        custom: false
+        name: Account
+        description: Standard Account object
+        nameField: Name
+        label: Account
+        fields:
+          key:
+            relationshipName: ""
+            defaultValue: Default value
+            unique: false
+            name: CustomField__c
+            length: 255
+            externalId: false
+            description: A custom text field
+            formula: ""
+            label: Custom Field
+            type: Text
+            required: false
+            referenceTo: ""
+        sharingModel: ReadWrite
+      properties:
+        name:
+          example: Account
+          title: name
+          type: string
+        label:
+          example: Account
+          title: label
+          type: string
+        custom:
+          example: false
+          title: custom
+          type: boolean
+        fields:
+          additionalProperties:
+            $ref: '#/components/schemas/FieldMetadata'
+          title: fields
+          type: object
+        description:
+          example: Standard Account object
+          title: description
+          type: string
+        sharingModel:
+          example: ReadWrite
+          title: sharingModel
+          type: string
+        nameField:
+          example: Name
+          title: nameField
+          type: string
+      title: ObjectMetadata
+      type: object
+    FieldMetadata:
+      example:
+        relationshipName: ""
+        defaultValue: Default value
+        unique: false
+        name: CustomField__c
+        length: 255
+        externalId: false
+        description: A custom text field
+        formula: ""
+        label: Custom Field
+        type: Text
+        required: false
+        referenceTo: ""
+      properties:
+        name:
+          example: CustomField__c
+          title: name
+          type: string
+        label:
+          example: Custom Field
+          title: label
+          type: string
+        type:
+          example: Text
+          title: type
+          type: string
+        length:
+          example: 255
+          title: length
+          type: integer
+        required:
+          example: false
+          title: required
+          type: boolean
+        unique:
+          example: false
+          title: unique
+          type: boolean
+        externalId:
+          example: false
+          title: externalId
+          type: boolean
+        description:
+          example: A custom text field
+          title: description
+          type: string
+        defaultValue:
+          example: Default value
+          title: defaultValue
+          type: string
+        formula:
+          example: ""
+          title: formula
+          type: string
+        referenceTo:
+          example: ""
+          title: referenceTo
+          type: string
+        relationshipName:
+          example: ""
+          title: relationshipName
+          type: string
+      title: FieldMetadata
+      type: object
+    WorkflowMetadata:
+      example:
+        criteria: Account.Status__c = 'Active'
+        name: Account_Status_Update
+        active: true
+        description: Updates Account status based on criteria
+        actions:
+        - field: Status__c
+          name: UpdateAccountStatus
+          type: FieldUpdate
+          value: Processed
+        - field: Status__c
+          name: UpdateAccountStatus
+          type: FieldUpdate
+          value: Processed
+        object: Account
+      properties:
+        name:
+          example: Account_Status_Update
+          title: name
+          type: string
+        object:
+          example: Account
+          title: object
+          type: string
+        active:
+          example: true
+          title: active
+          type: boolean
+        description:
+          example: Updates Account status based on criteria
+          title: description
+          type: string
+        criteria:
+          example: Account.Status__c = 'Active'
+          title: criteria
+          type: string
+        actions:
+          items:
+            $ref: '#/components/schemas/WorkflowMetadata_actions_inner'
+          title: actions
+          type: array
+      title: WorkflowMetadata
+      type: object
+    DashboardMetadata:
+      example:
+        components:
+        - reportName: SalesReport
+          name: SalesChart
+          type: Chart
+        - reportName: SalesReport
+          name: SalesChart
+          type: Chart
+        name: Sales_Dashboard
+        description: Key sales metrics dashboard
+        label: Sales Performance
+        folderName: Sales Dashboards
+      properties:
+        name:
+          example: Sales_Dashboard
+          title: name
+          type: string
+        label:
+          example: Sales Performance
+          title: label
+          type: string
+        description:
+          example: Key sales metrics dashboard
+          title: description
+          type: string
+        folderName:
+          example: Sales Dashboards
+          title: folderName
+          type: string
+        components:
+          items:
+            $ref: '#/components/schemas/DashboardMetadata_components_inner'
+          title: components
+          type: array
+      title: DashboardMetadata
+      type: object
+    FlowMetadata:
+      example:
+        name: Lead_Process
+        description: Automates lead qualification
+        label: Lead Qualification Process
+        processType: AutoLaunchedFlow
+        triggerType: ""
+        eventType: ""
+        status: Active
+      properties:
+        name:
+          example: Lead_Process
+          title: name
+          type: string
+        label:
+          example: Lead Qualification Process
+          title: label
+          type: string
+        description:
+          example: Automates lead qualification
+          title: description
+          type: string
+        status:
+          enum:
+          - Active
+          - Draft
+          - Obsolete
+          example: Active
+          title: status
+          type: string
+        processType:
+          enum:
+          - Flow
+          - AutoLaunchedFlow
+          - Workflow
+          example: AutoLaunchedFlow
+          title: processType
+          type: string
+        triggerType:
+          example: ""
+          title: triggerType
+          type: string
+        eventType:
+          example: ""
+          title: eventType
+          type: string
+      title: FlowMetadata
+      type: object
+    Organization:
+      example:
+        createdAt: 2025-01-01T12:00:00Z
+        lastConnected: 2025-04-21T14:30:00Z
+        name: My Production Org
+        description: Production Salesforce instance
+        id: 123e4567-e89b-12d3-a456-426614174000
+        type: production
+        instanceUrl: https://na1.salesforce.com
+      properties:
+        id:
+          example: 123e4567-e89b-12d3-a456-426614174000
+          format: uuid
+          title: id
+          type: string
+        name:
+          example: My Production Org
+          title: name
+          type: string
+        instanceUrl:
+          example: https://na1.salesforce.com
+          title: instanceUrl
+          type: string
+        description:
+          example: Production Salesforce instance
+          title: description
+          type: string
+        type:
+          enum:
+          - production
+          - sandbox
+          - developer
+          - scratch
+          example: production
+          title: type
+          type: string
+        createdAt:
+          example: 2025-01-01T12:00:00Z
+          format: date-time
+          title: createdAt
+          type: string
+        lastConnected:
+          example: 2025-04-21T14:30:00Z
+          format: date-time
+          title: lastConnected
+          type: string
+      title: Organization
+      type: object
+    OrganizationRequest:
+      example:
+        credentials:
+          securityToken: ABCDEFGHIJKLMNOP
+          password: myPassword123
+          clientId: 3MVG9e2mBbZnmcolVXiRm8YNot7VI5W_oiqJuBDdDUNF9s45MfoiV2h_nI2paMT1QA_yw3UxQncI7Goz8L1A7
+          clientSecret: "123456789012345678"
+          username: user@example.com
+        name: My Production Org
+        description: Production Salesforce instance
+        type: production
+        instanceUrl: https://na1.salesforce.com
+      properties:
+        name:
+          example: My Production Org
+          title: name
+          type: string
+        instanceUrl:
+          example: https://na1.salesforce.com
+          title: instanceUrl
+          type: string
+        description:
+          example: Production Salesforce instance
+          title: description
+          type: string
+        type:
+          enum:
+          - production
+          - sandbox
+          - developer
+          - scratch
+          example: production
+          title: type
+          type: string
+        credentials:
+          $ref: '#/components/schemas/OrganizationRequest_credentials'
+      required:
+      - instanceUrl
+      - name
+      title: OrganizationRequest
+      type: object
+    ErrorResponse_details_inner:
+      example:
+        field: username
+        message: Field is required
+      properties:
+        field:
+          example: username
+          title: field
+          type: string
+        message:
+          example: Field is required
+          title: message
+          type: string
+      title: ErrorResponse_details_inner
+      type: object
+    SchemaExtractionResponse_stats:
+      example:
+        flows: 2
+        objects: 10
+        workflows: 5
+        fields: 50
+        dashboards: 3
+      properties:
+        objects:
+          description: Number of objects extracted
+          example: 10
+          title: objects
+          type: integer
+        fields:
+          description: Number of fields extracted
+          example: 50
+          title: fields
+          type: integer
+        workflows:
+          description: Number of workflow rules extracted
+          example: 5
+          title: workflows
+          type: integer
+        dashboards:
+          description: Number of dashboards extracted
+          example: 3
+          title: dashboards
+          type: integer
+        flows:
+          description: Number of flows extracted
+          example: 2
+          title: flows
+          type: integer
+      title: SchemaExtractionResponse_stats
+      type: object
+    Schema_components:
+      example:
+        workflowRules:
+          key:
+            criteria: Account.Status__c = 'Active'
+            name: Account_Status_Update
+            active: true
+            description: Updates Account status based on criteria
+            actions:
+            - field: Status__c
+              name: UpdateAccountStatus
+              type: FieldUpdate
+              value: Processed
+            - field: Status__c
+              name: UpdateAccountStatus
+              type: FieldUpdate
+              value: Processed
+            object: Account
+        flows:
+          key:
+            name: Lead_Process
+            description: Automates lead qualification
+            label: Lead Qualification Process
+            processType: AutoLaunchedFlow
+            triggerType: ""
+            eventType: ""
+            status: Active
+        objects:
+          key:
+            custom: false
+            name: Account
+            description: Standard Account object
+            nameField: Name
+            label: Account
+            fields:
+              key:
+                relationshipName: ""
+                defaultValue: Default value
+                unique: false
+                name: CustomField__c
+                length: 255
+                externalId: false
+                description: A custom text field
+                formula: ""
+                label: Custom Field
+                type: Text
+                required: false
+                referenceTo: ""
+            sharingModel: ReadWrite
+        dashboards:
+          key:
+            components:
+            - reportName: SalesReport
+              name: SalesChart
+              type: Chart
+            - reportName: SalesReport
+              name: SalesChart
+              type: Chart
+            name: Sales_Dashboard
+            description: Key sales metrics dashboard
+            label: Sales Performance
+            folderName: Sales Dashboards
+      properties:
+        objects:
+          additionalProperties:
+            $ref: '#/components/schemas/ObjectMetadata'
+          title: objects
+          type: object
+        workflowRules:
+          additionalProperties:
+            $ref: '#/components/schemas/WorkflowMetadata'
+          title: workflowRules
+          type: object
+        dashboards:
+          additionalProperties:
+            $ref: '#/components/schemas/DashboardMetadata'
+          title: dashboards
+          type: object
+        flows:
+          additionalProperties:
+            $ref: '#/components/schemas/FlowMetadata'
+          title: flows
+          type: object
+      title: Schema_components
+      type: object
+    SchemaComparisonResponse_differences_inner_fieldChanges_inner:
+      example:
+        field: length
+        changeType: modified
+        targetValue:
+          length: 255
+        sourceValue:
+          length: 80
+      properties:
+        field:
+          example: length
+          title: field
+          type: string
+        changeType:
+          enum:
+          - added
+          - removed
+          - modified
+          example: modified
+          title: changeType
+          type: string
+        sourceValue:
+          example:
+            length: 80
+          title: sourceValue
+          type: object
+        targetValue:
+          example:
+            length: 255
+          title: targetValue
+          type: object
+      required:
+      - changeType
+      - field
+      title: SchemaComparisonResponse_differences_inner_fieldChanges_inner
+      type: object
+    SchemaComparisonResponse_differences_inner:
+      example:
+        componentType: field
+        changeType: modified
+        targetValue: "{}"
+        targetPath: objects.Account.fields.CustomField__c
+        componentName: Account.CustomField__c
+        sourceValue: "{}"
+        sourcePath: objects.Account.fields.CustomField__c
+        fieldChanges:
+        - field: length
+          changeType: modified
+          targetValue:
+            length: 255
+          sourceValue:
+            length: 80
+        - field: length
+          changeType: modified
+          targetValue:
+            length: 255
+          sourceValue:
+            length: 80
+      properties:
+        componentType:
+          enum:
+          - object
+          - field
+          - workflow
+          - dashboard
+          - flow
+          example: field
+          title: componentType
+          type: string
+        componentName:
+          example: Account.CustomField__c
+          title: componentName
+          type: string
+        changeType:
+          enum:
+          - added
+          - removed
+          - modified
+          example: modified
+          title: changeType
+          type: string
+        sourcePath:
+          example: objects.Account.fields.CustomField__c
+          title: sourcePath
+          type: string
+        targetPath:
+          example: objects.Account.fields.CustomField__c
+          title: targetPath
+          type: string
+        sourceValue:
+          description: Component value in the source schema
+          title: sourceValue
+          type: object
+        targetValue:
+          description: Component value in the target schema
+          title: targetValue
+          type: object
+        fieldChanges:
+          description: Field-level changes (for modified components)
+          items:
+            $ref: '#/components/schemas/SchemaComparisonResponse_differences_inner_fieldChanges_inner'
+          title: fieldChanges
+          type: array
+      required:
+      - changeType
+      - componentName
+      - componentType
+      title: SchemaComparisonResponse_differences_inner
+      type: object
+    DeploymentRequest_options:
+      example:
+        testLevel: NoTestRun
+        ignoreWarnings: false
+        runTests: false
+        rollbackOnError: true
+        autoUpdatePackage: false
+        purgeOnDelete: false
+        checkOnly: false
+      properties:
+        checkOnly:
+          default: false
+          description: Validate but don't deploy
+          title: checkOnly
+          type: boolean
+        ignoreWarnings:
+          default: false
+          description: Ignore validation warnings
+          title: ignoreWarnings
+          type: boolean
+        runTests:
+          default: false
+          description: Run specified tests
+          title: runTests
+          type: boolean
+        testLevel:
+          default: NoTestRun
+          enum:
+          - NoTestRun
+          - RunSpecifiedTests
+          - RunLocalTests
+          - RunAllTestsInOrg
+          title: testLevel
+          type: string
+        rollbackOnError:
+          default: true
+          description: Roll back on error
+          title: rollbackOnError
+          type: boolean
+        purgeOnDelete:
+          default: false
+          description: Purge on delete
+          title: purgeOnDelete
+          type: boolean
+        autoUpdatePackage:
+          default: false
+          description: Auto-update package
+          title: autoUpdatePackage
+          type: boolean
+      title: DeploymentRequest_options
+      type: object
+    DeploymentStatus_results:
+      example:
+        apexTestResults:
+        - testRunStatus: Passed
+          testRunId: 123e4567-e89b-12d3-a456-426614174000
+          message: Test completed successfully
+          testRunStackTrace: ""
+          testRunDuration: 0.123456789
+          testRunEndTime: 2025-04-21T14:35:00Z
+          apexClass: MyTestClass
+          testEndTime: 2025-04-21T14:35:00Z
+          testRunStartTime: 2025-04-21T14:30:00Z
+          stackTrace: ""
+          testStartTime: 2025-04-21T14:30:00Z
+          outcome: Passed
+          testDuration: 0.123456789
+          testRunMessage: Test run completed successfully
+        - testRunStatus: Passed
+          testRunId: 123e4567-e89b-12d3-a456-426614174000
+          message: Test completed successfully
+          testRunStackTrace: ""
+          testRunDuration: 0.123456789
+          testRunEndTime: 2025-04-21T14:35:00Z
+          apexClass: MyTestClass
+          testEndTime: 2025-04-21T14:35:00Z
+          testRunStartTime: 2025-04-21T14:30:00Z
+          stackTrace: ""
+          testStartTime: 2025-04-21T14:30:00Z
+          outcome: Passed
+          testDuration: 0.123456789
+          testRunMessage: Test run completed successfully
+        componentErrors:
+        - componentType: CustomField
+          problem: Field creation failed
+          fullName: Account.CustomField__c
+        - componentType: CustomField
+          problem: Field creation failed
+          fullName: Account.CustomField__c
+        success: true
+        componentSuccesses:
+        - componentType: CustomField
+          problem: Field creation failed
+          fullName: Account.CustomField__c
+        - componentType: CustomField
+          problem: Field creation failed
+          fullName: Account.CustomField__c
+        completedDate: 2025-04-21T14:35:00Z
+        componentFailures:
+        - componentType: CustomField
+          problem: Field creation failed
+          fullName: Account.CustomField__c
+        - componentType: CustomField
+          problem: Field creation failed
+          fullName: Account.CustomField__c
+      properties:
+        success:
+          description: Whether the deployment was successful
+          example: true
+          title: success
+          type: boolean
+        completedDate:
+          description: Completion timestamp
+          example: 2025-04-21T14:35:00Z
+          format: date-time
+          title: completedDate
+          type: string
+        componentFailures:
+          items:
+            $ref: '#/components/schemas/ComponentResult'
+          title: componentFailures
+          type: array
+        componentSuccesses:
+          items:
+            $ref: '#/components/schemas/ComponentResult'
+          title: componentSuccesses
+          type: array
+        componentErrors:
+          items:
+            $ref: '#/components/schemas/ComponentResult'
+          title: componentErrors
+          type: array
+        apexTestResults:
+          items:
+            $ref: '#/components/schemas/ApexTestResult'
+          title: apexTestResults
+          type: array
+      title: DeploymentStatus_results
+      type: object
+    WorkflowMetadata_actions_inner:
+      example:
+        field: Status__c
+        name: UpdateAccountStatus
+        type: FieldUpdate
+        value: Processed
+      properties:
+        type:
+          enum:
+          - FieldUpdate
+          - EmailAlert
+          - OutboundMessage
+          - Task
+          example: FieldUpdate
+          title: type
+          type: string
+        name:
+          example: UpdateAccountStatus
+          title: name
+          type: string
+        field:
+          example: Status__c
+          title: field
+          type: string
+        value:
+          example: Processed
+          title: value
+          type: string
+      title: WorkflowMetadata_actions_inner
+      type: object
+    DashboardMetadata_components_inner:
+      example:
+        reportName: SalesReport
+        name: SalesChart
+        type: Chart
+      properties:
+        name:
+          example: SalesChart
+          title: name
+          type: string
+        type:
+          example: Chart
+          title: type
+          type: string
+        reportName:
+          example: SalesReport
+          title: reportName
+          type: string
+      title: DashboardMetadata_components_inner
+      type: object
+    OrganizationRequest_credentials:
+      example:
+        securityToken: ABCDEFGHIJKLMNOP
+        password: myPassword123
+        clientId: 3MVG9e2mBbZnmcolVXiRm8YNot7VI5W_oiqJuBDdDUNF9s45MfoiV2h_nI2paMT1QA_yw3UxQncI7Goz8L1A7
+        clientSecret: "123456789012345678"
+        username: user@example.com
+      properties:
+        username:
+          example: user@example.com
+          title: username
+          type: string
+        password:
+          example: myPassword123
+          format: password
+          title: password
+          type: string
+        securityToken:
+          example: ABCDEFGHIJKLMNOP
+          title: securityToken
+          type: string
+        clientId:
+          example: 3MVG9e2mBbZnmcolVXiRm8YNot7VI5W_oiqJuBDdDUNF9s45MfoiV2h_nI2paMT1QA_yw3UxQncI7Goz8L1A7
+          title: clientId
+          type: string
+        clientSecret:
+          example: "123456789012345678"
+          title: clientSecret
+          type: string
+      title: OrganizationRequest_credentials
+      type: object
+  securitySchemes:
+    BearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http

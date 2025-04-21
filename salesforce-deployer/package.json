@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@stoplight/spectral-core": "^1.19.5",
+    "@stoplight/spectral-formats": "^1.8.2",
+    "@stoplight/spectral-functions": "^1.9.4",
+    "@stoplight/spectral-rulesets": "^1.21.4"
+  }
+}

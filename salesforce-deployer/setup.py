@@ -13,8 +13,22 @@ setup(
         'python-dotenv',
         'requests',
         'click',
-        'pytest'
+        'pytest',
+        'fastapi',
+        'uvicorn',
     ],
+    extras_require={
+        'dev': [
+            'pytest',
+            'pytest-cov',
+            'black',
+            'isort',
+            'mypy',
+        ],
+        'frontend': [
+            # Add any Python packages that might help with frontend integration
+        ]
+    },
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
